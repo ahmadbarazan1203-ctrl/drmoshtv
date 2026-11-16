@@ -15,6 +15,20 @@
       "when": 1794864192748,
       "tag": "0001_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794864879720,
+      "tag": "0002_restrict_platform_settings_contact",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794864892386,
+      "tag": "0003_settings_column_grants_authenticated",
+      "breakpoints": true
     }
   ]
 }

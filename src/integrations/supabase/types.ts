@@ -517,6 +517,13 @@ export type Database = {
         Returns: boolean
       }
       is_suspended: { Args: { _user_id: string }; Returns: boolean }
+      public_contact: {
+        Args: never
+        Returns: {
+          contact_email: string
+          contact_phone: string
+        }[]
+      }
       record_view: { Args: { _episode_id: string }; Returns: undefined }
     }
     Enums: {

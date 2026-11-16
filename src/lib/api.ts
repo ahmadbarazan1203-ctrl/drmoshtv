@@ -25,9 +25,14 @@ export const genresQuery = queryOptions({
 export const settingsQuery = queryOptions({
   queryKey: ["settings"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("platform_settings").select("*").eq("id", 1).maybeSingle();
-    if (error) throw error;
-    return data;
+    const [s, c] = await Promise.all([
+      supabase.from("platform_settings").select("id, site_name, site_description, seo_title, seo_description, og_image, social_links, section_order, updated_at").eq("id", 1).maybeSingle(),
+      supabase.rpc("public_contact"),
+    ]);
+    if (s.error) throw s.error;
+    if (!s.data) return null;
+    const contact = c.data?.[0];
+    return { ...s.data, contact_email: contact?.contact_email ?? null, contact_phone: contact?.contact_phone ?? null };
   },
   staleTime: 30_000,
 });
