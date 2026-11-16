@@ -24,6 +24,7 @@ export function ImageUpload({ value, onChange, folder, label, aspect = "aspect-[
     setBusy(false);
     if (signed.error) return toast.error(signed.error.message);
     onChange(signed.data.signedUrl);
+    return undefined;
   };
   return (
     <div className="space-y-1 text-sm">

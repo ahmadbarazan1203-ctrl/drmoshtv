@@ -47,7 +47,7 @@ function SeriesPage() {
   const eps = episodes.filter((e) => e.season_id === active);
   const sGenres = s.series_genres.map((x) => genres.find((g) => g.id === x.genre_id)).filter((g) => !!g);
   const cast = castOf(s);
-  const first = seasonsWithEps.length ? episodes.filter((e) => e.season_id === seasonsWithEps[0].id)[0] : undefined;
+  const first = seasonsWithEps.length ? episodes.find((e) => e.season_id === seasonsWithEps[0]?.id) : undefined;
 
   return (
     <div>

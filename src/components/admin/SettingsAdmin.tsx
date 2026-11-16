@@ -30,6 +30,7 @@ export function SettingsAdmin() {
       social_links: Object.fromEntries(Object.entries(f.social).filter(([, v]) => v.trim())),
     }).eq("id", 1);
     if (!errToast(error)) { toast.success(t("saved")); qc.invalidateQueries(); }
+    return undefined;
   };
   const addAnn = async () => {
     if (!msg.trim()) return;

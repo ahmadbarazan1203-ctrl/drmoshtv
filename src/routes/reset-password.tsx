@@ -30,6 +30,7 @@ function Reset() {
           if (error) return toast.error(error.message);
           toast.success(t("passwordUpdated"));
           nav({ to: "/backstage-k7q9" });
+          return undefined;
         }}
       >
         <Logo className="mx-auto h-8" />

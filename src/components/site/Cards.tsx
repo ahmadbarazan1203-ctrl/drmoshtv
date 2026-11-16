@@ -26,7 +26,7 @@ export function SeriesCard({ s, genres }: { s: SeriesWithGenres; genres: Genre[]
   );
 }
 
-export function EpisodeCard({ e, seriesTitle, seasonNumber }: { e: Episode; seriesTitle?: string; seasonNumber?: number }) {
+export function EpisodeCard({ e, seriesTitle, seasonNumber }: { e: Episode; seriesTitle?: string | undefined; seasonNumber?: number | undefined }) {
   const { t } = useI18n();
   return (
     <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group block w-64 shrink-0 sm:w-72">

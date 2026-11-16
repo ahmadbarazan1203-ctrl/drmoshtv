@@ -47,7 +47,7 @@ export function SeriesAdmin() {
     const slug = slugify(form.slug || title) || `series-${Date.now().toString(36)}`;
     if (!title || title.length > 200) return toast.error(t("f_title"));
     if (form.trailer_url && !form.trailer_url.startsWith("https://")) return toast.error("https://");
-    const cast = form.cast.split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 100).map((l) => { const [name, ...rest] = l.split(" - "); return { name: name.trim().slice(0, 100), character: rest.join(" - ").trim().slice(0, 100) || undefined }; });
+    const cast = form.cast.split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 100).map((l) => { const [name, ...rest] = l.split(" - "); return { name: (name ?? "").trim().slice(0, 100), character: rest.join(" - ").trim().slice(0, 100) || undefined }; });
     const row = {
       title, slug, synopsis: form.synopsis.trim().slice(0, 5000), poster_url: form.poster_url, cover_url: form.cover_url, trailer_url: form.trailer_url.trim() || null,
       release_date: form.release_date || null, release_year: form.release_date ? Number(form.release_date.slice(0, 4)) : null,

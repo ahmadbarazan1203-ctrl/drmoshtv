@@ -8,9 +8,9 @@ import { genreName, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>) => ({
-    q: typeof s.q === "string" ? s.q.slice(0, 100) : "",
-    genre: typeof s.genre === "string" ? s.genre : "",
-    sort: typeof s.sort === "string" ? s.sort : "newest",
+    q: typeof s["q"] === "string" ? s["q"].slice(0, 100) : "",
+    genre: typeof s["genre"] === "string" ? s["genre"] : "",
+    sort: typeof s["sort"] === "string" ? s["sort"] : "newest",
   }),
   head: () => ({
     meta: [

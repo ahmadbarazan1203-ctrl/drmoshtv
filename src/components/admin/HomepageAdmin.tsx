@@ -27,13 +27,13 @@ export function HomepageAdmin() {
     toast.success(t("saved"));
     qc.invalidateQueries();
   };
-  const move = (i: number, d: number) => { const n = [...order]; const j = i + d; if (j < 0 || j >= n.length) return; [n[i], n[j]] = [n[j], n[i]]; setOrder(n); };
+  const move = (i: number, d: number) => { const n = [...order]; const j = i + d; if (j < 0 || j >= n.length) return; const tmp = n[i]!; n[i] = n[j]!; n[j] = tmp; setOrder(n); };
   const saveOrder = async () => {
     const { error } = await supabase.from("platform_settings").update({ section_order: order }).eq("id", 1);
     if (!errToast(error)) { toast.success(t("saved")); qc.invalidateQueries(); }
   };
   const toggle = async (id: string, k: "is_trending" | "is_latest", v: boolean) => {
-    const { error } = await supabase.from("series").update({ [k]: v }).eq("id", id);
+    const { error } = await supabase.from("series").update(k === "is_trending" ? { is_trending: v } : { is_latest: v }).eq("id", id);
     if (!errToast(error)) qc.invalidateQueries();
   };
 
