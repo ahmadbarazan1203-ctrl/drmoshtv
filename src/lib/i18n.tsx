@@ -66,6 +66,8 @@ const D = {
   password: ["كلمة المرور", "Password", "Mot de passe", "Şifre"],
   newPassword: ["كلمة المرور الجديدة", "New password", "Nouveau mot de passe", "Yeni şifre"],
   displayName: ["الاسم المعروض", "Display name", "Nom affiché", "Görünen ad"],
+  firstSetup: ["أول مرة؟ أنشئ حساب المدير", "First time? Create admin account", "Première fois ? Créer le compte admin", "İlk kez mi? Yönetici hesabı oluştur"],
+  createAdmin: ["إنشاء الحساب والدخول", "Create account & sign in", "Créer le compte et se connecter", "Hesap oluştur ve giriş yap"],
   forgot: ["نسيت كلمة المرور؟", "Forgot password?", "Mot de passe oublié ?", "Şifremi unuttum"],
   sendReset: ["إرسال رابط الاستعادة", "Send reset link", "Envoyer le lien", "Sıfırlama bağlantısı gönder"],
   resetSent: ["تم إرسال رابط الاستعادة إلى بريدك.", "Reset link sent to your email.", "Lien envoyé par e-mail.", "Sıfırlama bağlantısı gönderildi."],

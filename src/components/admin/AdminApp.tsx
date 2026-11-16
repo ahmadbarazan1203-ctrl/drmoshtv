@@ -1,3 +1,4 @@
+import { setupAdminAccount } from "@/server/admin-setup.functions";
 import { useState } from "react";
 import { toast } from "sonner";
 import { BarChart3, Film, Home, LayoutDashboard, ListVideo, LogOut, Settings, Users } from "lucide-react";
@@ -77,12 +78,18 @@ function AdminLogin() {
   const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [mode, setMode] = useState<"in" | "forgot">("in");
+  const [mode, setMode] = useState<"in" | "forgot" | "setup">("in");
   const [busy, setBusy] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    if (mode === "in") {
+    if (mode === "setup") {
+      try {
+        await setupAdminAccount({ data: { email: email.trim(), password: pw } });
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw });
+        if (error) toast.error(error.message);
+      } catch (err) { toast.error((err as Error).message); }
+    } else if (mode === "in") {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw });
       if (error) toast.error(error.message);
     } else {
@@ -96,9 +103,10 @@ function AdminLogin() {
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-6 shadow-glow">
         <Logo className="mx-auto h-9" />
         <label className="block space-y-1 text-sm">{t("email")}<Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} autoComplete="email" /></label>
-        {mode === "in" && <label className="block space-y-1 text-sm">{t("password")}<Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required autoComplete="current-password" /></label>}
-        <Button variant="hero" className="w-full" disabled={busy}>{mode === "in" ? t("signIn") : t("sendReset")}</Button>
+        {mode !== "forgot" && <label className="block space-y-1 text-sm">{t("password")}<Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required autoComplete={mode === "setup" ? "new-password" : "current-password"} minLength={mode === "setup" ? 8 : undefined} /></label>}
+        <Button variant="hero" className="w-full" disabled={busy}>{mode === "in" ? t("signIn") : mode === "setup" ? t("createAdmin") : t("sendReset")}</Button>
         <button type="button" onClick={() => setMode(mode === "in" ? "forgot" : "in")} className="block w-full text-center text-sm text-muted-foreground hover:text-foreground">{mode === "in" ? t("forgot") : t("backToSignIn")}</button>
+        {mode === "in" && <button type="button" onClick={() => setMode("setup")} className="block w-full text-center text-sm text-primary hover:underline">{t("firstSetup")}</button>}
         <div className="flex justify-center"><LanguageSwitcher /></div>
       </form>
     </div>
