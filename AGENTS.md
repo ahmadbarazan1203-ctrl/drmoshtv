@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- UI strings live in src/lib/i18n.tsx (4 languages); never hardcode visible text. Why: every page must switch language.
+- Admin access is enforced by the `admin` role in user_roles via RLS/has_role; the private URL (src/lib/admin-path.ts + route file name) is only obscurity.
+- Images upload to the private `media` bucket and are stored as long-lived signed URLs. Why: workspace blocks public buckets.
