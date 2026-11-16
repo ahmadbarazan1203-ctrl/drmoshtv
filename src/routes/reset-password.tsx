@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/site/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import { ADMIN_PATH } from "@/lib/admin-path";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/reset-password")({
@@ -30,7 +29,7 @@ function Reset() {
           setBusy(false);
           if (error) return toast.error(error.message);
           toast.success(t("passwordUpdated"));
-          nav({ to: ADMIN_PATH as "/" });
+          nav({ to: "/backstage-k7q9" });
         }}
       >
         <Logo className="mx-auto h-8" />

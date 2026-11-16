@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesSlugRouteImport } from './routes/series.$slug'
 import { Route as WatchEpisodeIdRouteImport } from './routes/watch.$episodeId'
 
@@ -19,9 +21,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeriesSlugRoute = SeriesSlugRouteImport.update({
@@ -37,34 +49,61 @@ const WatchEpisodeIdRoute = WatchEpisodeIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/series/$slug': typeof SeriesSlugRoute
   '/watch/$episodeId': typeof WatchEpisodeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/series/$slug': typeof SeriesSlugRoute
   '/watch/$episodeId': typeof WatchEpisodeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/series/$slug': typeof SeriesSlugRoute
   '/watch/$episodeId': typeof WatchEpisodeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/search' | '/series/$slug' | '/watch/$episodeId'
+  fullPaths:
+    | '/'
+    | '/reset-password'
+    | '/search'
+    | '/sitemap.xml'
+    | '/series/$slug'
+    | '/watch/$episodeId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/series/$slug' | '/watch/$episodeId'
-  id: '__root__' | '/' | '/search' | '/series/$slug' | '/watch/$episodeId'
+  to:
+    | '/'
+    | '/reset-password'
+    | '/search'
+    | '/sitemap.xml'
+    | '/series/$slug'
+    | '/watch/$episodeId'
+  id:
+    | '__root__'
+    | '/'
+    | '/reset-password'
+    | '/search'
+    | '/sitemap.xml'
+    | '/series/$slug'
+    | '/watch/$episodeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SeriesSlugRoute: typeof SeriesSlugRoute
   WatchEpisodeIdRoute: typeof WatchEpisodeIdRoute
 }
@@ -78,11 +117,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/series/$slug': {
@@ -104,7 +157,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SeriesSlugRoute: SeriesSlugRoute,
   WatchEpisodeIdRoute: WatchEpisodeIdRoute,
 }
