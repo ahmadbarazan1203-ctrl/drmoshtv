@@ -1,4 +1,4 @@
-import { setupAdminAccount } from "@/server/admin-setup.functions";
+import { setupAdminAccount } from "@/lib/admin-setup.functions";
 import { useState } from "react";
 import { toast } from "sonner";
 import { BarChart3, Film, Home, LayoutDashboard, ListVideo, LogOut, Settings, Users } from "lucide-react";
