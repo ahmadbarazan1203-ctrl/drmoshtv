@@ -1,0 +1,2 @@
+revoke select on public.platform_settings from authenticated;
+grant select (id, site_name, site_description, seo_title, seo_description, og_image, social_links, section_order, updated_at) on public.platform_settings to authenticated;
