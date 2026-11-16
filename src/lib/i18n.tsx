@@ -171,7 +171,8 @@ type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: TKey) => string; dir
 const I18nCtx = createContext<Ctx | null>(null);
 
 export function translate(lang: Lang, k: TKey) {
-  return D[k][IDX[lang]];
+  const row = D[k] as readonly string[];
+  return row[IDX[lang]] ?? row[0] ?? k;
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
