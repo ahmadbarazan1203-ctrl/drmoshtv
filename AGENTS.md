@@ -32,4 +32,4 @@ use the editor.
 ## Project rules
 - UI strings live in src/lib/i18n.tsx (4 languages); never hardcode visible text. Why: every page must switch language.
 - Admin access is enforced by the `admin` role in user_roles via RLS/has_role; the private URL (src/lib/admin-path.ts + route file name) is only obscurity.
-- Images upload to the private `media` bucket and are stored as long-lived signed URLs. Why: workspace blocks public buckets.
+- Images upload via an admin-checked server function (src/lib/ext-storage.functions.ts) to the owner's external storage project (public `media` bucket, EXT_STORAGE_* secrets). Why: owner wants files in their own storage.
