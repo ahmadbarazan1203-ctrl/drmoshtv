@@ -3,7 +3,8 @@ import { toast } from "sonner";
 import { Upload } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { uploadImage } from "@/lib/ext-storage.functions";
 import { useI18n } from "@/lib/i18n";
 
 const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
@@ -12,18 +13,22 @@ const MAX = 5 * 1024 * 1024;
 export function ImageUpload({ value, onChange, folder, label, aspect = "aspect-[2/3]" }: { value: string | null; onChange: (url: string | null) => void; folder: string; label: string; aspect?: string }) {
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
+  const upload = useServerFn(uploadImage);
   const onFile = async (f: File) => {
     if (!ALLOWED.includes(f.type)) return toast.error("JPG / PNG / WEBP");
     if (f.size > MAX) return toast.error("Max 5MB");
     setBusy(true);
-    const ext = f.type === "image/png" ? "png" : f.type === "image/webp" ? "webp" : "jpg";
-    const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-    const up = await supabase.storage.from("media").upload(path, f, { contentType: f.type, cacheControl: "31536000" });
-    if (up.error) { setBusy(false); return toast.error(up.error.message); }
-    const signed = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-    setBusy(false);
-    if (signed.error) return toast.error(signed.error.message);
-    onChange(signed.data.signedUrl);
+    try {
+      const buf = new Uint8Array(await f.arrayBuffer());
+      let bin = "";
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      const r = await upload({ data: { folder, type: f.type, base64: btoa(bin) } });
+      onChange(r.url);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
     return undefined;
   };
   return (
