@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { settingsQuery } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { Button, ConfirmDelete, errToast, Field, ImageUpload } from "./shared";

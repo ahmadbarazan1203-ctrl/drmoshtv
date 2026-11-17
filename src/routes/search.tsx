@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { EpisodeCard, SeriesCard } from "@/components/site/Cards";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { genresQuery, homeQuery } from "@/lib/api";
 import { genreName, useI18n } from "@/lib/i18n";
 

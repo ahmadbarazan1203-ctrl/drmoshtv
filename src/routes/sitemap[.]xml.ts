@@ -1,16 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import { supabase as sb } from "@/lib/db";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-        const sb = createClient<Database>(process.env["SUPABASE_URL"]!, key, {
-          auth: { persistSession: false, autoRefreshToken: false },
-          global: { fetch: (input, init) => { const h = new Headers(init?.headers); if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization"); h.set("apikey", key); return fetch(input, { ...init, headers: h }); } },
-        });
         const origin = new URL(request.url).origin;
         const [{ data: series }, { data: eps }] = await Promise.all([
           sb.from("series").select("slug, updated_at").eq("is_published", true),
