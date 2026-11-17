@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireDbAuth } from "@/lib/db-auth.server";
 
 const ALLOWED: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX = 5 * 1024 * 1024;
 
 // Admin-only: uploads an image to the owner's external storage project (public "media" bucket).
 export const uploadImage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireDbAuth])
   .inputValidator((d: { folder: string; type: string; base64: string }) => {
     if (!/^[a-z0-9_-]{1,40}$/.test(d?.folder ?? "")) throw new Error("Invalid folder");
     if (!ALLOWED[d?.type]) throw new Error("JPG / PNG / WEBP");
