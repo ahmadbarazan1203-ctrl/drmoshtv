@@ -5,10 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/site/Logo";
 import { supabase } from "@/lib/db";
-import { useI18n } from "@/lib/i18n";
+import { translate, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({ meta: [
+    { title: `${translate("ar", "newPassword")} — ${translate("ar", "brand")}` },
+    { name: "description", content: translate("ar", "updatePassword") },
+    { property: "og:title", content: `${translate("ar", "newPassword")} — ${translate("ar", "brand")}` },
+    { property: "og:description", content: translate("ar", "updatePassword") },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex, nofollow" },
+  ] }),
   component: Reset,
 });
 

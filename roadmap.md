@@ -4,3 +4,4 @@
 - [x] Admin dashboard: series, episodes, homepage, users(roles), analytics, settings
 - [x] SEO: sitemap, robots, per-page meta
 - [x] No sample series — catalog starts empty
+- [x] External image URLs in all shared admin image fields; retain existing externally hosted episode video playback
