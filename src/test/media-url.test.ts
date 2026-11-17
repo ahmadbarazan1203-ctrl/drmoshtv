@@ -22,6 +22,6 @@ describe("External media", () => {
   it("reads one server per line with optional names and converts VidHide share links", () => {
     const s = parseServers("https://vidhide.com/v/abc123\nBackup | https://cdn.example.org/ep.mp4");
     expect(s).toEqual([{ name: "1", url: "https://vidhide.com/v/abc123" }, { name: "Backup", url: "https://cdn.example.org/ep.mp4" }]);
-    expect(parseVideo(s[0].url)).toEqual({ kind: "embed", embed: "https://vidhide.com/embed/abc123" });
+    expect(parseVideo(s[0]?.url)).toEqual({ kind: "embed", embed: "https://vidhide.com/embed/abc123" });
   });
 });
