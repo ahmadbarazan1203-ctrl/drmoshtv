@@ -52,7 +52,7 @@ export function ImageUpload({ value, onChange, folder, label, aspect = "aspect-[
       </label>
       <label className="block space-y-1">
         <span>{t("f_imageUrl")}</span>
-        <Input type="url" dir="ltr" value={link} maxLength={4000} onChange={(e) => setLink(e.target.value)} disabled={busy} />
+        <Input type="url" dir="ltr" value={link} maxLength={4000} onChange={(e) => { const v = e.target.value; setLink(v); const u = parseImageUrl(v); if (u) { setImageFailed(false); onChange(u); } }} disabled={busy} />
       </label>
       <div className="flex flex-wrap gap-2">
         <Button type="button" size="sm" variant="secondary" onClick={applyLink} disabled={busy || !link.trim()}>{t("f_applyUrl")}</Button>

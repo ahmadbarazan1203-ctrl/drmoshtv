@@ -17,6 +17,12 @@ describe("External admin image input", () => {
     expect(onChange).toHaveBeenCalledWith("https://images.example.org/poster.webp");
     expect(upload).not.toHaveBeenCalled();
   });
+  it("uses a pasted valid link even without pressing apply", () => {
+    const onChange = vi.fn();
+    render(<I18nProvider><ImageUpload value={null} onChange={onChange} folder="posters" label="Poster" /></I18nProvider>);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "https://i.ibb.co/x/p.jpg" } });
+    expect(onChange).toHaveBeenCalledWith("https://i.ibb.co/x/p.jpg");
+  });
   it("does not save an unsafe link", () => {
     const onChange = vi.fn();
     render(<I18nProvider><ImageUpload value={null} onChange={onChange} folder="posters" label="Poster" /></I18nProvider>);
