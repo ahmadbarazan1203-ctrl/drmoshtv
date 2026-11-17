@@ -20,7 +20,7 @@ export function ImageUpload({ value, onChange, folder, label, aspect = "aspect-[
   useEffect(() => { setLink(value ?? ""); setImageFailed(false); }, [value]);
   const applyLink = () => {
     const url = parseImageUrl(link);
-    if (!url) return toast.error(t("f_invalidImageUrl"));
+    if (!url) { toast.error(t("f_invalidImageUrl")); return; }
     setImageFailed(false);
     onChange(url);
   };
