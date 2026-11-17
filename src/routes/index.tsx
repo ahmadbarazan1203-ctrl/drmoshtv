@@ -52,7 +52,7 @@ function Home() {
   return (
     <div>
       <section className="relative flex min-h-[78vh] items-end overflow-hidden md:min-h-[88vh]">
-        <img src={hero?.cover_url ?? heroBg} alt="" width={1920} height={1088} className="absolute inset-0 size-full object-cover" />
+        <img referrerPolicy="no-referrer" src={hero?.cover_url ?? heroBg} alt="" width={1920} height={1088} className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-fade-bottom" />
         <div className="absolute inset-0 bg-fade-side" />
         <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-16 md:px-8 md:pb-24">

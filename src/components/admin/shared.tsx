@@ -46,7 +46,7 @@ export function ImageUpload({ value, onChange, folder, label, aspect = "aspect-[
     <div className="space-y-1 text-sm">
       <span>{label}</span>
       <label className={`relative flex ${aspect} w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-surface hover:border-primary`}>
-        {value && !imageFailed ? <img src={value} alt="" className="size-full object-cover" onError={() => setImageFailed(true)} /> : <span className="flex flex-col items-center gap-1 text-xs text-muted-foreground"><Upload className="size-5" />{imageFailed ? t("f_imageUnavailable") : busy ? t("f_uploading") : t("f_upload")}</span>}
+        {value && !imageFailed ? <img referrerPolicy="no-referrer" src={value} alt="" className="size-full object-cover" onError={() => setImageFailed(true)} /> : <span className="flex flex-col items-center gap-1 text-xs text-muted-foreground"><Upload className="size-5" />{imageFailed ? t("f_imageUnavailable") : busy ? t("f_uploading") : t("f_upload")}</span>}
         {busy && value && <span className="absolute inset-0 flex items-center justify-center bg-background/70 text-xs">{t("f_uploading")}</span>}
         <input type="file" accept={ALLOWED.join(",")} className="sr-only" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ""; }} />
       </label>

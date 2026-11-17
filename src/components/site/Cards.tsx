@@ -11,7 +11,7 @@ export function SeriesCard({ s, genres }: { s: SeriesWithGenres; genres: Genre[]
     <Link to="/series/$slug" params={{ slug: s.slug }} className="group block w-36 shrink-0 sm:w-44 md:w-48">
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface ring-1 ring-border/50 transition duration-300 group-hover:-translate-y-1 group-hover:ring-primary group-hover:shadow-glow">
         {s.poster_url ? (
-          <img src={s.poster_url} alt={s.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" />
+          <img referrerPolicy="no-referrer" src={s.poster_url} alt={s.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" />
         ) : (
           <div className="flex size-full items-center justify-center bg-gradient-primary/20 p-3 text-center text-sm font-medium">{s.title}</div>
         )}
@@ -31,7 +31,7 @@ export function EpisodeCard({ e, seriesTitle, seasonNumber }: { e: Episode; seri
   return (
     <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group block w-64 shrink-0 sm:w-72">
       <div className="relative aspect-video overflow-hidden rounded-lg bg-surface ring-1 ring-border/50 transition group-hover:ring-primary">
-        {e.thumbnail_url ? <img src={e.thumbnail_url} alt={e.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="size-full bg-gradient-primary opacity-30" />}
+        {e.thumbnail_url ? <img referrerPolicy="no-referrer" src={e.thumbnail_url} alt={e.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="size-full bg-gradient-primary opacity-30" />}
         <div className="absolute inset-0 flex items-center justify-center bg-background/30 opacity-0 transition group-hover:opacity-100">
           <span className="rounded-full bg-gradient-primary p-3 shadow-glow"><Play className="size-5 fill-current" /></span>
         </div>

@@ -52,11 +52,11 @@ function SeriesPage() {
   return (
     <div>
       <section className="relative min-h-[70vh] overflow-hidden">
-        {s.cover_url && <img src={s.cover_url} alt="" className="absolute inset-0 size-full object-cover" />}
+        {s.cover_url && <img referrerPolicy="no-referrer" src={s.cover_url} alt="" className="absolute inset-0 size-full object-cover" />}
         <div className="absolute inset-0 bg-fade-bottom" />
         <div className="absolute inset-0 bg-fade-side" />
         <div className="relative mx-auto flex max-w-[1600px] flex-col gap-8 px-4 pt-28 pb-10 md:flex-row md:items-end md:px-8 md:pt-40">
-          {s.poster_url && <img src={s.poster_url} alt={s.title} className="w-40 shrink-0 rounded-xl shadow-glow ring-1 ring-border md:w-60" />}
+          {s.poster_url && <img referrerPolicy="no-referrer" src={s.poster_url} alt={s.title} className="w-40 shrink-0 rounded-xl shadow-glow ring-1 ring-border md:w-60" />}
           <div className="max-w-3xl animate-rise space-y-4">
             <h1 className="text-3xl font-bold md:text-5xl">{s.title}</h1>
             <div className="flex flex-wrap gap-2 text-xs">
@@ -93,7 +93,7 @@ function SeriesPage() {
                 <li key={e.id}>
                   <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group flex gap-4 rounded-xl border border-border bg-card p-3 transition hover:border-primary">
                     <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-lg bg-surface sm:w-44">
-                      {e.thumbnail_url && <img src={e.thumbnail_url} alt="" loading="lazy" className="size-full object-cover" />}
+                      {e.thumbnail_url && <img referrerPolicy="no-referrer" src={e.thumbnail_url} alt="" loading="lazy" className="size-full object-cover" />}
                       <Play className="absolute inset-0 m-auto size-8 rounded-full bg-gradient-primary p-2 opacity-0 transition group-hover:opacity-100" />
                     </div>
                     <div className="min-w-0 space-y-1">
