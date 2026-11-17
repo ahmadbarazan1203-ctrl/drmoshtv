@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireDbAuth } from "@/lib/db-auth.server";
+import { requireDbAuth } from "@/lib/db-middleware";
 
 const ALLOWED: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX = 5 * 1024 * 1024;

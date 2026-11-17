@@ -11,7 +11,7 @@ export const setupAdminAccount = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     if (data.email !== ADMIN_EMAIL) throw new Error("Not allowed");
-    const supabaseAdmin = (await import("@/lib/db-auth.server")).dbAdmin();
+    const supabaseAdmin = (await import("@/lib/db-middleware")).dbAdmin();
     const { data: list, error: le } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (le) throw new Error(le.message);
     if (list.users.some((u) => u.email?.toLowerCase() === ADMIN_EMAIL)) throw new Error("Account already exists");
