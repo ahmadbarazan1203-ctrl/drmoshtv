@@ -34,3 +34,4 @@ use the editor.
 - Admin access is enforced by the `admin` role in user_roles via RLS/has_role; the private URL (src/lib/admin-path.ts + route file name) is only obscurity.
 - Database, auth and storage use the owner's own Supabase project via src/lib/db.ts (client), src/lib/db-auth.ts + src/lib/db-middleware.ts (server auth, service client from EXT_STORAGE_SERVICE_KEY); never import @/integrations/supabase/client or Cloud middleware. Schema changes must also be applied to that project. Why: owner moved everything off Lovable Cloud.
 - Images upload via the admin-checked server function in src/lib/ext-storage.functions.ts to the public `media` bucket. Why: workspace rule kept files in owner storage.
+- Shared admin image fields also accept validated HTTPS URLs without uploading or copying the image; episode videos use direct HTTPS files or the existing YouTube/Vimeo embeds. Why: external hosting must remain an alternative to owner storage.
