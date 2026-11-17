@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EpisodeCard, Row } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
 import { supabase } from "@/lib/db";
-import { episodeQuery } from "@/lib/api";
+import { episodeQuery, parseServers } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/watch/$episodeId")({
@@ -46,13 +46,7 @@ function Watch() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 px-4 pt-24 md:px-8">
-      <VideoPlayer
-        url={e.video_url}
-        poster={e.thumbnail_url}
-        title={e.title}
-        onFirstPlay={onFirstPlay}
-        onEnded={() => next && nav({ to: "/watch/$episodeId", params: { episodeId: next.id } })}
-      />
+      <ServerPicker raw={e.video_url} poster={e.thumbnail_url} title={e.title} onFirstPlay={onFirstPlay} onEnded={() => next && nav({ to: "/watch/$episodeId", params: { episodeId: next.id } })} />
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
           <Link to="/series/$slug" params={{ slug: s.slug }} className="text-sm text-primary-glow hover:underline">{s.title}</Link>
@@ -74,6 +68,27 @@ function Watch() {
           <Row title={t("relatedEpisodes")}>
             {all.filter((x) => x.id !== e.id).map((x) => <EpisodeCard key={x.id} e={x} seasonNumber={seasonNum[x.season_id]} />)}
           </Row>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ServerPicker({ raw, poster, title, onFirstPlay, onEnded }: { raw: string | null; poster: string | null; title: string; onFirstPlay: () => void; onEnded: () => void }) {
+  const { t } = useI18n();
+  const servers = parseServers(raw);
+  const [i, setI] = useState(0);
+  useEffect(() => setI(0), [raw]);
+  const cur = servers[i] ?? servers[0];
+  return (
+    <div className="space-y-3">
+      <VideoPlayer url={cur?.url ?? null} poster={poster} title={title} onFirstPlay={onFirstPlay} onEnded={onEnded} />
+      {servers.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">{t("servers")}:</span>
+          {servers.map((s, k) => (
+            <button key={k} onClick={() => setI(k)} className={`rounded-full px-4 py-1.5 text-sm ring-1 ring-border ${k === i ? "bg-gradient-primary shadow-glow" : "bg-secondary"}`}>{/^\d+$/.test(s.name) ? `${t("server")} ${s.name}` : s.name}</button>
+          ))}
         </div>
       )}
     </div>

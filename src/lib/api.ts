@@ -123,7 +123,7 @@ export function slugify(v: string) {
   return v.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
-export type VideoSource = { kind: "youtube" | "vimeo"; embed: string } | { kind: "file"; src: string } | null;
+export type VideoSource = { kind: "youtube" | "vimeo" | "embed"; embed: string } | { kind: "file"; src: string } | null;
 
 export function parseVideo(url: string | null | undefined): VideoSource {
   if (!url) return null;
@@ -141,5 +141,19 @@ export function parseVideo(url: string | null | undefined): VideoSource {
     if (id && /^\d+$/.test(id)) return { kind: "vimeo", embed: `https://player.vimeo.com/video/${id}` };
     return null;
   }
-  return { kind: "file", src: u.href };
+  if (/\.(mp4|webm|m4v|mov|ogv|ogg|m3u8)$/i.test(u.pathname)) return { kind: "file", src: u.href };
+  // VidHide-style hosts: share links (/v/, /f/, /d/, /file/) become embed links.
+  const m = u.pathname.match(/^\/(?:v|f|d|file|e)\/([\w-]+)/);
+  if (m) return { kind: "embed", embed: `${u.origin}/embed/${m[1]}` };
+  return { kind: "embed", embed: u.href };
+}
+
+// Several servers per episode: one per line, optionally "Name | https://...".
+export function parseServers(raw: string | null | undefined): { name: string; url: string }[] {
+  return (raw ?? "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l, i) => {
+    const k = l.lastIndexOf("|");
+    const name = k > 0 ? l.slice(0, k).trim() : "";
+    const url = (k > 0 ? l.slice(k + 1) : l).trim();
+    return { name: name || `${i + 1}`, url };
+  }).filter((x) => parseVideo(x.url));
 }

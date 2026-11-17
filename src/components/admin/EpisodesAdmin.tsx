@@ -48,7 +48,7 @@ export function EpisodesAdmin() {
     if (!form || !sid) return;
     const title = form.title.trim();
     if (!title) return toast.error(t("f_title"));
-    if (form.video_url && !parseVideo(form.video_url.trim())) return toast.error(t("f_videoUrl"));
+    { const bad = form.video_url.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).find((l) => !parseVideo(l.slice(l.lastIndexOf("|") + 1).trim())); if (bad) return toast.error(`${t("f_videoUrl")}: ${bad}`); }
     if (form.season_number < 1 || form.episode_number < 1) return toast.error(t("f_episodeNumber"));
     setBusy(true);
     let season = data?.seasons.find((s) => s.season_number === form.season_number);
@@ -121,7 +121,7 @@ export function EpisodesAdmin() {
               </div>
               <Field label={t("f_title")}><Input value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} /></Field>
               <Field label={t("f_synopsis")}><Textarea rows={3} maxLength={5000} value={form.description} onChange={(e) => set("description", e.target.value)} /></Field>
-              <Field label={t("f_videoUrl")}><Input dir="ltr" value={form.video_url} maxLength={1000} placeholder="https://" onChange={(e) => set("video_url", e.target.value)} /></Field>
+              <Field label={t("f_videoUrl")}><Textarea dir="ltr" rows={3} value={form.video_url} maxLength={4000} placeholder={"https://...\nServer 2 | https://..."} onChange={(e) => set("video_url", e.target.value)} /><p className="text-xs text-muted-foreground">{t("f_serversHint")}</p></Field>
               <div className="max-w-xs"><ImageUpload label={t("f_thumbnail")} value={form.thumbnail_url} onChange={(v) => set("thumbnail_url", v)} folder="thumbnails" aspect="aspect-video" /></div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label={t("f_publishAt")}><Input type="datetime-local" value={form.publish_at} onChange={(e) => set("publish_at", e.target.value)} /></Field>
