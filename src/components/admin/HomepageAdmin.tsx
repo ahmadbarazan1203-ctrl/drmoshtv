@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { settingsQuery } from "@/lib/api";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { adminSeriesQuery } from "./SeriesAdmin";

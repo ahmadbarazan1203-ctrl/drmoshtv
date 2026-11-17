@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 
 type AuthState = { user: User | null; isAdmin: boolean; loading: boolean };
 const Ctx = createContext<AuthState>({ user: null, isAdmin: false, loading: true });

@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { EpisodeCard, Row } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { episodeQuery } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
