@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { EpisodeCard, Row } from "@/components/site/Cards";
+import { EpisodeCard, EpisodeRow } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
 import { supabase } from "@/lib/db";
 import { episodeQuery, episodeThumbnail, parseServers } from "@/lib/api";
@@ -65,9 +65,9 @@ function Watch() {
       </div>
       {all.length > 1 && (
         <div className="-mx-4 md:-mx-8">
-          <Row title={t("relatedEpisodes")}>
+          <EpisodeRow title={t("relatedEpisodes")}>
             {all.filter((x) => x.id !== e.id).map((x) => <EpisodeCard key={x.id} e={x} seasonNumber={seasonNum[x.season_id]} seriesPoster={s.poster_url} />)}
-          </Row>
+          </EpisodeRow>
         </div>
       )}
     </div>

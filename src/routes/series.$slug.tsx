@@ -3,9 +3,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Play } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SeriesCard, SeriesRow } from "@/components/site/Cards";
+import { EpisodeCard, SeriesCard, SeriesRow } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
-import { castOf, episodeThumbnail, genresQuery, seriesQuery } from "@/lib/api";
+import { castOf, genresQuery, seriesQuery } from "@/lib/api";
 import { genreName, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/series/$slug")({
@@ -88,20 +88,10 @@ function SeriesPage() {
             </div>
           </div>
           {eps.length === 0 ? <p className="text-muted-foreground">{t("noEpisodes")}</p> : (
-            <ol className="grid gap-3 md:grid-cols-2">
+            <ol className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6">
               {eps.map((e) => (
-                <li key={e.id}>
-                  <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group flex gap-4 rounded-xl border border-border bg-card p-3 transition hover:border-primary">
-                    <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-lg bg-surface sm:w-44">
-                      {episodeThumbnail(e, s) && <img referrerPolicy="no-referrer" src={episodeThumbnail(e, s)!} alt="" loading="lazy" className="size-full object-cover" />}
-                      <Play className="absolute inset-0 m-auto size-8 rounded-full bg-gradient-primary p-2 opacity-0 transition group-hover:opacity-100" />
-                    </div>
-                    <div className="min-w-0 space-y-1">
-                      <h3 className="font-medium">{e.episode_number}. {e.title}</h3>
-                      {e.duration_minutes ? <p className="text-xs text-muted-foreground">{e.duration_minutes} {t("min")}</p> : null}
-                      <p className="line-clamp-2 text-sm text-muted-foreground">{e.description}</p>
-                    </div>
-                  </Link>
+                <li key={e.id} className="min-w-0">
+                  <EpisodeCard e={e} seriesPoster={s.poster_url} />
                 </li>
               ))}
             </ol>

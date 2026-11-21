@@ -92,7 +92,7 @@ function SearchPage() {
       {eps && eps.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">{t("episodes")}</h2>
-          <div className="flex flex-wrap gap-4">{eps.map((e) => { const parent = e.series as { title: string; poster_url: string | null } | null; return <EpisodeCard key={e.id} e={e} seriesTitle={parent?.title} seriesPoster={parent?.poster_url} />; })}</div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6">{eps.map((e) => { const parent = e.series as { title: string; poster_url: string | null } | null; return <EpisodeCard key={e.id} e={e} seriesTitle={parent?.title} seriesPoster={parent?.poster_url} />; })}</div>
         </section>
       )}
     </div>

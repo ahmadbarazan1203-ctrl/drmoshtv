@@ -31,32 +31,23 @@ export function EpisodeCard({ e, seriesTitle, seasonNumber, seriesPoster }: { e:
   const { t } = useI18n();
   const thumbnail = episodeThumbnail(e, seriesPoster);
   return (
-    <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group block w-64 shrink-0 sm:w-72">
-      <div className="relative aspect-video overflow-hidden rounded-lg bg-surface ring-1 ring-border/50 transition group-hover:ring-primary">
-        {thumbnail ? <img referrerPolicy="no-referrer" src={thumbnail} alt={e.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="size-full bg-gradient-primary opacity-30" />}
+    <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group block w-full min-w-0">
+      <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface ring-1 ring-border/50 transition duration-300 group-hover:-translate-y-1 group-hover:ring-primary group-hover:shadow-glow">
+        {thumbnail ? <img referrerPolicy="no-referrer" src={thumbnail} alt={e.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="flex size-full items-center justify-center bg-gradient-primary/20 p-3 text-center text-sm font-medium">{e.title}</div>}
         <div className="absolute inset-0 flex items-center justify-center bg-background/30 opacity-0 transition group-hover:opacity-100">
           <span className="rounded-full bg-gradient-primary p-3 shadow-glow"><Play className="size-5 fill-current" /></span>
         </div>
         {e.duration_minutes ? <span className="absolute bottom-2 end-2 rounded bg-background/80 px-1.5 py-0.5 text-[10px]">{e.duration_minutes} {t("min")}</span> : null}
       </div>
-      <div className="mt-2 px-0.5">
+      <div className="mt-2 space-y-0.5 px-0.5">
         {seriesTitle && <p className="truncate text-xs text-primary-glow">{seriesTitle}</p>}
-        <h3 className="truncate text-sm font-medium">{seasonNumber ? `${t("season")} ${seasonNumber} · ` : ""}{t("episode")} {e.episode_number}: {e.title}</h3>
+        <h3 className="line-clamp-2 text-sm font-medium">{seasonNumber ? `${t("season")} ${seasonNumber} · ` : ""}{t("episode")} {e.episode_number}: {e.title}</h3>
       </div>
     </Link>
   );
 }
 
-export function Row({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="animate-rise space-y-3">
-      <h2 className="px-4 text-lg font-semibold md:px-8 md:text-xl">{title}</h2>
-      <div className="scrollbar-none flex gap-3 overflow-x-auto px-4 pb-3 md:gap-4 md:px-8">{children}</div>
-    </section>
-  );
-}
-
-export function SeriesRow({ title, children }: { title: string; children: React.ReactNode }) {
+function PosterRow({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="animate-rise mx-auto max-w-[1600px] space-y-4">
       <h2 className="px-4 text-lg font-semibold md:px-8 md:text-xl">{title}</h2>
@@ -64,3 +55,5 @@ export function SeriesRow({ title, children }: { title: string; children: React.
     </section>
   );
 }
+
+export { PosterRow as EpisodeRow, PosterRow as SeriesRow };

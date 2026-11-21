@@ -3,7 +3,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Info, Play } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { Button } from "@/components/ui/button";
-import { EpisodeCard, Row, SeriesCard, SeriesRow } from "@/components/site/Cards";
+import { EpisodeCard, EpisodeRow, SeriesCard, SeriesRow } from "@/components/site/Cards";
 import { genresQuery, homeQuery, settingsQuery, type SeriesWithGenres } from "@/lib/api";
 import { genreName, useI18n, type TKey } from "@/lib/i18n";
 
@@ -86,9 +86,9 @@ function Home() {
           if (sec === "episodes") {
             if (!data.episodes.length) return null;
             return (
-              <Row key={key} title={t("recent_episodes")}>
+              <EpisodeRow key={key} title={t("recent_episodes")}>
                 {data.episodes.map((e) => { const parent = e.series as { title: string; poster_url: string | null } | null; return <EpisodeCard key={e.id} e={e} seriesTitle={parent?.title} seriesPoster={parent?.poster_url} />; })}
-              </Row>
+              </EpisodeRow>
             );
           }
           if (sec === "genres") {
