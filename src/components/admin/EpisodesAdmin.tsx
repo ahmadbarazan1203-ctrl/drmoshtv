@@ -12,7 +12,7 @@ import { useI18n } from "@/lib/i18n";
 import { adminSeriesQuery } from "./SeriesAdmin";
 import { Button, ConfirmDelete, errToast, Field, ImageUpload, selectCls } from "./shared";
 
-type Form = { id?: string; season_number: number; episode_number: number; title: string; description: string; thumbnail_url: string | null; video_url: string; duration_minutes: string; is_published: boolean; publish_at: string };
+type Form = { id?: string; season_number: number; episode_number: number; title: string; description: string; thumbnail_url: string | null; use_series_poster: boolean; video_url: string; duration_minutes: string; is_published: boolean; publish_at: string };
 
 function toLocal(iso: string) { const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
 
@@ -37,17 +37,19 @@ export function EpisodesAdmin() {
   const [busy, setBusy] = useState(false);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => (f ? { ...f, [k]: v } : f));
   const seasonNum = new Map(data?.seasons.map((s) => [s.id, s.season_number]));
+  const selectedSeries = series?.find((s) => s.id === sid);
 
   const newEp = () => {
     const lastSeason = data?.seasons.at(-1)?.season_number ?? 1;
     const inLast = data?.episodes.filter((e) => seasonNum.get(e.season_id) === lastSeason).length ?? 0;
-    setForm({ season_number: lastSeason, episode_number: inLast + 1, title: "", description: "", thumbnail_url: null, video_url: "", duration_minutes: "", is_published: false, publish_at: toLocal(new Date().toISOString()) });
+    setForm({ season_number: lastSeason, episode_number: inLast + 1, title: "", description: "", thumbnail_url: null, use_series_poster: true, video_url: "", duration_minutes: "", is_published: false, publish_at: toLocal(new Date().toISOString()) });
   };
 
   const save = async () => {
     if (!form || !sid) return;
     const title = form.title.trim();
     if (!title) return toast.error(t("f_title"));
+    if (!form.use_series_poster && !form.thumbnail_url) return toast.error(t("f_thumbnailRequired"));
     { const bad = form.video_url.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).find((l) => !parseVideo(l.slice(l.lastIndexOf("|") + 1).trim())); if (bad) return toast.error(`${t("f_videoUrl")}: ${bad}`); }
     if (form.season_number < 1 || form.episode_number < 1) return toast.error(t("f_episodeNumber"));
     setBusy(true);
@@ -59,7 +61,7 @@ export function EpisodesAdmin() {
     }
     const row = {
       series_id: sid, season_id: season.id, episode_number: form.episode_number, title: title.slice(0, 200), description: form.description.trim().slice(0, 5000),
-      thumbnail_url: form.thumbnail_url, video_url: form.video_url.trim() || null, duration_minutes: form.duration_minutes ? Math.max(0, Math.min(1000, Number(form.duration_minutes))) : null,
+      thumbnail_url: form.use_series_poster ? null : form.thumbnail_url, video_url: form.video_url.trim() || null, duration_minutes: form.duration_minutes ? Math.max(0, Math.min(1000, Number(form.duration_minutes))) : null,
       is_published: form.is_published, publish_at: new Date(form.publish_at).toISOString(),
     };
     const r = form.id ? await supabase.from("episodes").update(row).eq("id", form.id) : await supabase.from("episodes").insert(row);
@@ -99,7 +101,7 @@ export function EpisodesAdmin() {
                     <td className="p-3">{e.title}</td>
                     <td className={`p-3 whitespace-nowrap ${scheduled ? "text-primary-glow" : e.is_published ? "text-success" : "text-muted-foreground"}`}>{scheduled ? `${t("f_scheduled")} ${new Date(e.publish_at).toLocaleString()}` : e.is_published ? t("f_published") : t("f_draft")}</td>
                     <td className="p-3 whitespace-nowrap text-end">
-                      <Button size="sm" variant="secondary" onClick={() => setForm({ id: e.id, season_number: seasonNum.get(e.season_id) ?? 1, episode_number: e.episode_number, title: e.title, description: e.description, thumbnail_url: e.thumbnail_url, video_url: e.video_url ?? "", duration_minutes: e.duration_minutes?.toString() ?? "", is_published: e.is_published, publish_at: toLocal(e.publish_at) })}><Pencil /></Button>
+                      <Button size="sm" variant="secondary" onClick={() => setForm({ id: e.id, season_number: seasonNum.get(e.season_id) ?? 1, episode_number: e.episode_number, title: e.title, description: e.description, thumbnail_url: e.thumbnail_url, use_series_poster: !e.thumbnail_url || e.thumbnail_url === selectedSeries?.poster_url, video_url: e.video_url ?? "", duration_minutes: e.duration_minutes?.toString() ?? "", is_published: e.is_published, publish_at: toLocal(e.publish_at) })}><Pencil /></Button>
                       <ConfirmDelete onConfirm={() => remove(e.id)}><Button size="sm" variant="ghost" aria-label={t("delete")}><Trash2 className="text-destructive" /></Button></ConfirmDelete>
                     </td>
                   </tr>
@@ -122,7 +124,15 @@ export function EpisodesAdmin() {
               <Field label={t("f_title")}><Input value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} /></Field>
               <Field label={t("f_synopsis")}><Textarea rows={3} maxLength={5000} value={form.description} onChange={(e) => set("description", e.target.value)} /></Field>
               <Field label={t("f_videoUrl")}><Textarea dir="ltr" rows={3} value={form.video_url} maxLength={4000} placeholder={"https://...\nServer 2 | https://..."} onChange={(e) => set("video_url", e.target.value)} /><p className="text-xs text-muted-foreground">{t("f_serversHint")}</p></Field>
-              <div className="max-w-xs"><ImageUpload label={t("f_thumbnail")} value={form.thumbnail_url} onChange={(v) => set("thumbnail_url", v)} folder="thumbnails" aspect="aspect-video" /></div>
+              <div className="space-y-3 rounded-xl border border-border bg-surface/40 p-3">
+                <label className="flex items-center gap-2 text-sm"><Switch checked={form.use_series_poster} onCheckedChange={(v) => set("use_series_poster", v)} />{t("f_useSeriesPoster")}</label>
+                <p className="text-xs text-muted-foreground">{t("f_seriesPosterHint")}</p>
+                {form.use_series_poster ? (
+                  selectedSeries?.poster_url ? <img referrerPolicy="no-referrer" src={selectedSeries.poster_url} alt={t("f_poster")} className="aspect-[2/3] w-32 rounded-lg object-cover ring-1 ring-border" /> : <p className="text-xs text-muted-foreground">{t("f_addSeriesPosterFirst")}</p>
+                ) : (
+                  <div className="max-w-xs"><ImageUpload label={t("f_thumbnail")} value={form.thumbnail_url} onChange={(v) => set("thumbnail_url", v)} folder="thumbnails" aspect="aspect-video" /></div>
+                )}
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label={t("f_publishAt")}><Input type="datetime-local" value={form.publish_at} onChange={(e) => set("publish_at", e.target.value)} /></Field>
                 <label className="flex items-center gap-2 pt-6 text-sm"><Switch checked={form.is_published} onCheckedChange={(v) => set("is_published", v)} />{t("f_published")}</label>

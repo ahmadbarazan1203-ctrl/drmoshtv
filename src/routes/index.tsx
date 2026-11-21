@@ -3,17 +3,17 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Info, Play } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { Button } from "@/components/ui/button";
-import { EpisodeCard, Row, SeriesCard } from "@/components/site/Cards";
+import { EpisodeCard, Row, SeriesCard, SeriesRow } from "@/components/site/Cards";
 import { genresQuery, homeQuery, settingsQuery, type SeriesWithGenres } from "@/lib/api";
 import { genreName, useI18n, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "درموش تي في — مسلسلات وإنتاجات الذكاء الاصطناعي" },
-      { name: "description", content: "شاهد مسلسلات وقصصاً أصلية وإنتاجات سينمائية مصنوعة بالذكاء الاصطناعي على درموش تي في." },
-      { property: "og:title", content: "درموش تي في — DRMOSH TV" },
-      { property: "og:description", content: "منصة البث الأولى لمسلسلات الذكاء الاصطناعي الأصلية." },
+      { title: "TAIB AI TV+ — مسلسلات وإنتاجات الذكاء الاصطناعي" },
+      { name: "description", content: "شاهد مسلسلات وقصصاً أصلية وإنتاجات سينمائية مصنوعة بالذكاء الاصطناعي على TAIB AI TV+." },
+      { property: "og:title", content: "TAIB AI TV+" },
+      { property: "og:description", content: "منصة مسلسلات الذكاء الاصطناعي الأصلية TAIB AI TV+." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -87,7 +87,7 @@ function Home() {
             if (!data.episodes.length) return null;
             return (
               <Row key={key} title={t("recent_episodes")}>
-                {data.episodes.map((e) => <EpisodeCard key={e.id} e={e} seriesTitle={(e.series as { title: string } | null)?.title} />)}
+                {data.episodes.map((e) => { const parent = e.series as { title: string; poster_url: string | null } | null; return <EpisodeCard key={e.id} e={e} seriesTitle={parent?.title} seriesPoster={parent?.poster_url} />; })}
               </Row>
             );
           }
@@ -106,9 +106,9 @@ function Home() {
           }
           if (!sec.items.length) return null;
           return (
-            <Row key={key} title={t(sec.title)}>
+            <SeriesRow key={key} title={t(sec.title)}>
               {sec.items.map((s) => <SeriesCard key={s.id} s={s} genres={genres} />)}
-            </Row>
+            </SeriesRow>
           );
         })}
       </div>

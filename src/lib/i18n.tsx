@@ -10,7 +10,7 @@ export const LANGS: { code: Lang; label: string }[] = [
 
 // key: [ar, en, fr, tr]
 const D = {
-  brand: ["درموش تي في", "DRMOSH TV", "DRMOSH TV", "DRMOSH TV"],
+  brand: ["TAIB AI TV+", "TAIB AI TV+", "TAIB AI TV+", "TAIB AI TV+"],
   tagline: ["عالم من المسلسلات المصنوعة بالذكاء الاصطناعي", "A world of AI-made series", "Un monde de séries créées par l'IA", "Yapay zekâ ile üretilmiş diziler dünyası"],
   home: ["الرئيسية", "Home", "Accueil", "Ana Sayfa"],
   browse: ["تصفح", "Browse", "Parcourir", "Göz At"],
@@ -29,7 +29,7 @@ const D = {
   popular: ["الأكثر مشاهدة", "Most popular", "Les plus populaires", "En popüler"],
   recent_episodes: ["حلقات أضيفت مؤخراً", "Recently added episodes", "Épisodes récents", "Yeni eklenen bölümler"],
   recommended: ["مقترح لك", "Recommended for you", "Recommandé pour vous", "Sizin için önerilenler"],
-  originals: ["إنتاجات درموش الأصلية", "DRMOSH TV Originals", "Originaux DRMOSH TV", "DRMOSH TV Orijinalleri"],
+  originals: ["إنتاجات TAIB AI TV+ الأصلية", "TAIB AI TV+ Originals", "Originaux TAIB AI TV+", "TAIB AI TV+ Orijinalleri"],
   genres: ["التصنيفات", "Genres", "Genres", "Türler"],
   continueWatching: ["تابع المشاهدة", "Continue watching", "Reprendre", "İzlemeye devam et"],
   emptyCatalog: ["لا يوجد محتوى منشور بعد. ترقّبوا أولى إنتاجاتنا قريباً.", "No published content yet. Our first productions are coming soon.", "Aucun contenu publié pour l'instant. Nos premières productions arrivent bientôt.", "Henüz yayınlanmış içerik yok. İlk yapımlarımız yakında."],
@@ -98,7 +98,7 @@ const D = {
   language: ["اللغة", "Language", "Langue", "Dil"],
   contact: ["تواصل معنا", "Contact", "Contact", "İletişim"],
   rights: ["جميع الحقوق محفوظة", "All rights reserved", "Tous droits réservés", "Tüm hakları saklıdır"],
-  footerNote: ["كل المحتوى على المنصة مملوك لدرموش تي في أو مرخّص لها.", "All content is owned by or licensed to DRMOSH TV.", "Tout le contenu appartient à DRMOSH TV ou est sous licence.", "Tüm içerik DRMOSH TV'ye aittir veya lisanslıdır."],
+  footerNote: ["كل المحتوى على المنصة مملوك لـ TAIB AI TV+ أو مرخّص لها.", "All content is owned by or licensed to TAIB AI TV+.", "Tout le contenu appartient à TAIB AI TV+ ou est sous licence.", "Tüm içerik TAIB AI TV+'ye aittir veya lisanslıdır."],
   original: ["أصلي", "Original", "Original", "Orijinal"],
   views: ["مشاهدة", "views", "vues", "izlenme"],
   // admin
@@ -142,6 +142,10 @@ const D = {
   f_seasonNumber: ["رقم الموسم", "Season number", "N° saison", "Sezon no"],
   f_episodeNumber: ["رقم الحلقة", "Episode number", "N° épisode", "Bölüm no"],
   f_thumbnail: ["الصورة المصغرة", "Thumbnail", "Miniature", "Küçük resim"],
+  f_useSeriesPoster: ["استخدم صورة المسلسل كصورة مصغرة", "Use the series poster as the thumbnail", "Utiliser l’affiche de la série comme miniature", "Dizi afişini küçük resim olarak kullan"],
+  f_seriesPosterHint: ["تتحدث صورة الحلقة تلقائياً عند تغيير بوستر المسلسل.", "The episode image updates automatically when the series poster changes.", "La miniature se met à jour avec l’affiche de la série.", "Bölüm görseli dizi afişiyle otomatik güncellenir."],
+  f_addSeriesPosterFirst: ["أضف بوستراً للمسلسل أولاً.", "Add a poster to the series first.", "Ajoutez d’abord une affiche à la série.", "Önce diziye bir afiş ekleyin."],
+  f_thumbnailRequired: ["اختر صورة مصغرة أو فعّل استخدام صورة المسلسل.", "Choose a thumbnail or enable the series poster.", "Choisissez une miniature ou utilisez l’affiche de la série.", "Bir küçük resim seçin veya dizi afişini kullanın."],
   f_videoUrl: ["روابط الفيديو (سيرفر بكل سطر)", "Video links (one server per line)", "URL vidéo (MP4, YouTube, Vimeo)", "Video URL (MP4, YouTube, Vimeo)"],
   f_duration: ["المدة بالدقائق", "Duration (min)", "Durée (min)", "Süre (dk)"],
   f_publishAt: ["موعد النشر", "Publish at", "Publier le", "Yayın zamanı"],

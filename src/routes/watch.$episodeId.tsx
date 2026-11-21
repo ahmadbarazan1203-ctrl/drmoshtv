@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 import { EpisodeCard, Row } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
 import { supabase } from "@/lib/db";
-import { episodeQuery, parseServers } from "@/lib/api";
+import { episodeQuery, episodeThumbnail, parseServers } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/watch/$episodeId")({
   loader: async ({ context, params }) => {
     const d = await context.queryClient.ensureQueryData(episodeQuery(params.episodeId));
     if (!d || !d.series) throw notFound();
-    return { title: d.episode.title, series: d.series.title, desc: d.episode.description, image: d.episode.thumbnail_url };
+    return { title: d.episode.title, series: d.series.title, desc: d.episode.description, image: episodeThumbnail(d.episode, d.series) };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "غير متوفر — درموش تي في" }, { name: "robots", content: "noindex" }] };
-    const title = `${loaderData.series}: ${loaderData.title} — درموش تي في`;
+    if (!loaderData) return { meta: [{ title: "غير متوفر — TAIB AI TV+" }, { name: "robots", content: "noindex" }] };
+    const title = `${loaderData.series}: ${loaderData.title} — TAIB AI TV+`;
     const desc = (loaderData.desc || loaderData.series).slice(0, 160);
     const meta = [
       { title },
@@ -46,7 +46,7 @@ function Watch() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 px-4 pt-24 md:px-8">
-      <ServerPicker raw={e.video_url} poster={e.thumbnail_url} title={e.title} onFirstPlay={onFirstPlay} onEnded={() => next && nav({ to: "/watch/$episodeId", params: { episodeId: next.id } })} />
+      <ServerPicker raw={e.video_url} poster={episodeThumbnail(e, s)} title={e.title} onFirstPlay={onFirstPlay} onEnded={() => next && nav({ to: "/watch/$episodeId", params: { episodeId: next.id } })} />
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
           <Link to="/series/$slug" params={{ slug: s.slug }} className="text-sm text-primary-glow hover:underline">{s.title}</Link>
@@ -66,7 +66,7 @@ function Watch() {
       {all.length > 1 && (
         <div className="-mx-4 md:-mx-8">
           <Row title={t("relatedEpisodes")}>
-            {all.filter((x) => x.id !== e.id).map((x) => <EpisodeCard key={x.id} e={x} seasonNumber={seasonNum[x.season_id]} />)}
+            {all.filter((x) => x.id !== e.id).map((x) => <EpisodeCard key={x.id} e={x} seasonNumber={seasonNum[x.season_id]} seriesPoster={s.poster_url} />)}
           </Row>
         </div>
       )}

@@ -85,9 +85,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "درموش تي في — DRMOSH TV" },
+      { title: "TAIB AI TV+" },
       { name: "description", content: "منصة بث لمسلسلات وإنتاجات سينمائية مصنوعة بالذكاء الاصطناعي." },
-      { property: "og:site_name", content: "DRMOSH TV" },
+      { property: "og:site_name", content: "TAIB AI TV+" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#0d0a14" },

@@ -5,3 +5,7 @@
 - [x] SEO: sitemap, robots, per-page meta
 - [x] No sample series — catalog starts empty
 - [x] External image URLs in all shared admin image fields; retain existing externally hosted episode video playback
+- [x] Verify all runtime data/auth traffic uses the owner's Supabase project, not Lovable Cloud
+- [x] Let episodes inherit their series poster as the thumbnail, controlled from the admin
+- [x] Display series as responsive grids of vertical posters
+- [x] Rename the platform to TAIB AI TV+

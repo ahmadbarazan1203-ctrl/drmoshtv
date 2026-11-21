@@ -14,10 +14,10 @@ export const Route = createFileRoute("/search")({
   }),
   head: () => ({
     meta: [
-      { title: "البحث والتصفح — درموش تي في" },
-      { name: "description", content: "ابحث في مسلسلات وحلقات درموش تي في حسب الاسم أو التصنيف أو الكلمات المفتاحية." },
-      { property: "og:title", content: "البحث — درموش تي في" },
-      { property: "og:description", content: "اكتشف مسلسلات الذكاء الاصطناعي على درموش تي في." },
+      { title: "البحث والتصفح — TAIB AI TV+" },
+      { name: "description", content: "ابحث في مسلسلات وحلقات TAIB AI TV+ حسب الاسم أو التصنيف أو الكلمات المفتاحية." },
+      { property: "og:title", content: "البحث — TAIB AI TV+" },
+      { property: "og:description", content: "اكتشف مسلسلات الذكاء الاصطناعي على TAIB AI TV+." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -59,7 +59,7 @@ function SearchPage() {
     enabled: needle.length >= 2,
     queryFn: async () => {
       const safe = needle.replace(/[%_,()]/g, " ");
-      const { data } = await supabase.from("episodes").select("*, series:series_id(title)").eq("is_published", true).lte("publish_at", new Date().toISOString()).ilike("title", `%${safe}%`).limit(20);
+      const { data } = await supabase.from("episodes").select("*, series:series_id(title, poster_url)").eq("is_published", true).lte("publish_at", new Date().toISOString()).ilike("title", `%${safe}%`).limit(20);
       return data ?? [];
     },
   });
@@ -86,13 +86,13 @@ function SearchPage() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">{t("results")} ({series.length})</h2>
         {series.length === 0 ? <p className="text-muted-foreground">{data.series.length ? t("noResults") : t("emptyCatalog")}</p> : (
-          <div className="flex flex-wrap gap-4">{series.map((s) => <SeriesCard key={s.id} s={s} genres={genres} />)}</div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6">{series.map((s) => <SeriesCard key={s.id} s={s} genres={genres} />)}</div>
         )}
       </section>
       {eps && eps.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">{t("episodes")}</h2>
-          <div className="flex flex-wrap gap-4">{eps.map((e) => <EpisodeCard key={e.id} e={e} seriesTitle={(e.series as { title: string } | null)?.title} />)}</div>
+          <div className="flex flex-wrap gap-4">{eps.map((e) => { const parent = e.series as { title: string; poster_url: string | null } | null; return <EpisodeCard key={e.id} e={e} seriesTitle={parent?.title} seriesPoster={parent?.poster_url} />; })}</div>
         </section>
       )}
     </div>

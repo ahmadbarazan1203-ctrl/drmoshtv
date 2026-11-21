@@ -10,6 +10,12 @@ export type Settings = Database["public"]["Tables"]["platform_settings"]["Row"];
 export type SeriesWithGenres = Series & { series_genres: { genre_id: string }[] };
 export type CastMember = { name: string; character?: string };
 
+// A null episode thumbnail means "use the series poster" so it stays in sync.
+export function episodeThumbnail(episode: Pick<Episode, "thumbnail_url">, seriesOrPoster?: Pick<Series, "poster_url"> | string | null) {
+  const poster = typeof seriesOrPoster === "string" ? seriesOrPoster : seriesOrPoster?.poster_url;
+  return episode.thumbnail_url ?? poster ?? null;
+}
+
 const SERIES_SEL = "*, series_genres(genre_id)";
 
 export const genresQuery = queryOptions({
@@ -51,7 +57,7 @@ export const homeQuery = queryOptions({
   queryFn: async () => {
     const [series, episodes, featured] = await Promise.all([
       supabase.from("series").select(SERIES_SEL).eq("is_published", true).order("created_at", { ascending: false }).limit(200),
-      supabase.from("episodes").select("*, series:series_id(title, slug)").eq("is_published", true).lte("publish_at", new Date().toISOString()).order("publish_at", { ascending: false }).limit(16),
+      supabase.from("episodes").select("*, series:series_id(title, slug, poster_url)").eq("is_published", true).lte("publish_at", new Date().toISOString()).order("publish_at", { ascending: false }).limit(16),
       supabase.from("featured_content").select("series_id").eq("slot", "hero").order("position").limit(1),
     ]);
     if (series.error) throw series.error;

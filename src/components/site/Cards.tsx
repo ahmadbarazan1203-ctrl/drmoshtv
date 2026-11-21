@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Play } from "lucide-react";
 import type { Episode, Genre, SeriesWithGenres } from "@/lib/api";
+import { episodeThumbnail } from "@/lib/api";
 import { genreName, useI18n } from "@/lib/i18n";
 
 export function SeriesCard({ s, genres }: { s: SeriesWithGenres; genres: Genre[] }) {
@@ -8,7 +9,7 @@ export function SeriesCard({ s, genres }: { s: SeriesWithGenres; genres: Genre[]
   const g = genres.find((x) => x.id === s.series_genres[0]?.genre_id);
   const status = s.production_status === "upcoming" ? t("status_upcoming") : t("available");
   return (
-    <Link to="/series/$slug" params={{ slug: s.slug }} className="group block w-36 shrink-0 sm:w-44 md:w-48">
+    <Link to="/series/$slug" params={{ slug: s.slug }} className="group block w-full min-w-0">
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface ring-1 ring-border/50 transition duration-300 group-hover:-translate-y-1 group-hover:ring-primary group-hover:shadow-glow">
         {s.poster_url ? (
           <img referrerPolicy="no-referrer" src={s.poster_url} alt={s.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" />
@@ -26,12 +27,13 @@ export function SeriesCard({ s, genres }: { s: SeriesWithGenres; genres: Genre[]
   );
 }
 
-export function EpisodeCard({ e, seriesTitle, seasonNumber }: { e: Episode; seriesTitle?: string | undefined; seasonNumber?: number | undefined }) {
+export function EpisodeCard({ e, seriesTitle, seasonNumber, seriesPoster }: { e: Episode; seriesTitle?: string | undefined; seasonNumber?: number | undefined; seriesPoster?: string | null | undefined }) {
   const { t } = useI18n();
+  const thumbnail = episodeThumbnail(e, seriesPoster);
   return (
     <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group block w-64 shrink-0 sm:w-72">
       <div className="relative aspect-video overflow-hidden rounded-lg bg-surface ring-1 ring-border/50 transition group-hover:ring-primary">
-        {e.thumbnail_url ? <img referrerPolicy="no-referrer" src={e.thumbnail_url} alt={e.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="size-full bg-gradient-primary opacity-30" />}
+        {thumbnail ? <img referrerPolicy="no-referrer" src={thumbnail} alt={e.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="size-full bg-gradient-primary opacity-30" />}
         <div className="absolute inset-0 flex items-center justify-center bg-background/30 opacity-0 transition group-hover:opacity-100">
           <span className="rounded-full bg-gradient-primary p-3 shadow-glow"><Play className="size-5 fill-current" /></span>
         </div>
@@ -50,6 +52,15 @@ export function Row({ title, children }: { title: string; children: React.ReactN
     <section className="animate-rise space-y-3">
       <h2 className="px-4 text-lg font-semibold md:px-8 md:text-xl">{title}</h2>
       <div className="scrollbar-none flex gap-3 overflow-x-auto px-4 pb-3 md:gap-4 md:px-8">{children}</div>
+    </section>
+  );
+}
+
+export function SeriesRow({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="animate-rise mx-auto max-w-[1600px] space-y-4">
+      <h2 className="px-4 text-lg font-semibold md:px-8 md:text-xl">{title}</h2>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-7 px-4 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:px-8 lg:grid-cols-5 xl:grid-cols-6">{children}</div>
     </section>
   );
 }

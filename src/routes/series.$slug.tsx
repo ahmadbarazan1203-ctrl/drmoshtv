@@ -3,9 +3,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Play } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Row, SeriesCard } from "@/components/site/Cards";
+import { SeriesCard, SeriesRow } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
-import { castOf, genresQuery, seriesQuery } from "@/lib/api";
+import { castOf, episodeThumbnail, genresQuery, seriesQuery } from "@/lib/api";
 import { genreName, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/series/$slug")({
@@ -18,10 +18,10 @@ export const Route = createFileRoute("/series/$slug")({
     return { title: d.series.title, synopsis: d.series.synopsis, image: d.series.cover_url ?? d.series.poster_url };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "غير متوفر — درموش تي في" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData) return { meta: [{ title: "غير متوفر — TAIB AI TV+" }, { name: "robots", content: "noindex" }] };
     const desc = loaderData.synopsis.slice(0, 160);
     const meta = [
-      { title: `${loaderData.title} — درموش تي في` },
+      { title: `${loaderData.title} — TAIB AI TV+` },
       { name: "description", content: desc },
       { property: "og:title", content: loaderData.title },
       { property: "og:description", content: desc },
@@ -93,7 +93,7 @@ function SeriesPage() {
                 <li key={e.id}>
                   <Link to="/watch/$episodeId" params={{ episodeId: e.id }} className="group flex gap-4 rounded-xl border border-border bg-card p-3 transition hover:border-primary">
                     <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-lg bg-surface sm:w-44">
-                      {e.thumbnail_url && <img referrerPolicy="no-referrer" src={e.thumbnail_url} alt="" loading="lazy" className="size-full object-cover" />}
+                      {episodeThumbnail(e, s) && <img referrerPolicy="no-referrer" src={episodeThumbnail(e, s)!} alt="" loading="lazy" className="size-full object-cover" />}
                       <Play className="absolute inset-0 m-auto size-8 rounded-full bg-gradient-primary p-2 opacity-0 transition group-hover:opacity-100" />
                     </div>
                     <div className="min-w-0 space-y-1">
@@ -129,7 +129,7 @@ function SeriesPage() {
           </section>
         )}
       </div>
-      {related.length > 0 && <div className="mt-12"><Row title={t("related")}>{related.map((r) => <SeriesCard key={r.id} s={r} genres={genres} />)}</Row></div>}
+      {related.length > 0 && <div className="mt-12"><SeriesRow title={t("related")}>{related.map((r) => <SeriesCard key={r.id} s={r} genres={genres} />)}</SeriesRow></div>}
     </div>
   );
 }
