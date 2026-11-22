@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseImageUrl } from "@/lib/media-url";
-import { parseServers, parseVideo } from "@/lib/api";
+import { formatServers, parseServers, parseVideo, serverInputs } from "@/lib/api";
 
 describe("External media", () => {
   it("accepts externally hosted images without requiring a filename extension", () => {
@@ -18,10 +18,18 @@ describe("External media", () => {
     expect(parseVideo("https://youtu.be/abcdefghijk")?.kind).toBe("youtube");
     expect(parseVideo("https://vimeo.com/12345678")?.kind).toBe("vimeo");
   });
-});describe("Multiple servers", () => {
+});
+describe("Multiple servers", () => {
   it("reads one server per line with optional names and converts VidHide share links", () => {
     const s = parseServers("https://vidhide.com/v/abc123\nBackup | https://cdn.example.org/ep.mp4");
     expect(s).toEqual([{ name: "1", url: "https://vidhide.com/v/abc123" }, { name: "Backup", url: "https://cdn.example.org/ep.mp4" }]);
     expect(parseVideo(s[0]?.url)).toEqual({ kind: "embed", embed: "https://vidhide.com/embed/abc123" });
+  });
+  it("keeps separately edited server names and URLs when saving", () => {
+    const raw = formatServers([{ name: "Main", url: " https://cdn.example.org/ep.mp4 " }, { name: "", url: "https://player.example.org/watch/42" }]);
+    expect(serverInputs(raw)).toEqual([{ name: "Main", url: "https://cdn.example.org/ep.mp4" }, { name: "", url: "https://player.example.org/watch/42" }]);
+  });
+  it("accepts HTTPS player links from any external host", () => {
+    expect(parseVideo("https://player.example.org/watch/42?quality=hd")).toEqual({ kind: "embed", embed: "https://player.example.org/watch/42?quality=hd" });
   });
 });

@@ -154,12 +154,21 @@ export function parseVideo(url: string | null | undefined): VideoSource {
   return { kind: "embed", embed: u.href };
 }
 
-// Several servers per episode: one per line, optionally "Name | https://...".
-export function parseServers(raw: string | null | undefined): { name: string; url: string }[] {
-  return (raw ?? "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l, i) => {
+export type ServerInput = { name: string; url: string };
+
+// Stored as lines for compatibility with existing episodes; the admin edits structured fields.
+export function serverInputs(raw: string | null | undefined): ServerInput[] {
+  return (raw ?? "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => {
     const k = l.lastIndexOf("|");
-    const name = k > 0 ? l.slice(0, k).trim() : "";
-    const url = (k > 0 ? l.slice(k + 1) : l).trim();
-    return { name: name || `${i + 1}`, url };
-  }).filter((x) => parseVideo(x.url));
+    return { name: k > 0 ? l.slice(0, k).trim() : "", url: (k > 0 ? l.slice(k + 1) : l).trim() };
+  });
+}
+
+export function formatServers(servers: ServerInput[]): string {
+  return servers.map((s) => ({ name: s.name.trim(), url: s.url.trim() })).filter((s) => s.url)
+    .map((s) => s.name ? `${s.name} | ${s.url}` : s.url).join("\n");
+}
+
+export function parseServers(raw: string | null | undefined): { name: string; url: string }[] {
+  return serverInputs(raw).map((s, i) => ({ name: s.name || `${i + 1}`, url: s.url })).filter((s) => parseVideo(s.url));
 }

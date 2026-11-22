@@ -10,3 +10,4 @@
 - [x] Display series as responsive grids of vertical posters
 - [x] Rename the platform to TAIB AI TV+
 - [x] Display episode cards as vertical posters on the home, series, watch, and search pages
+- [x] Manage episode servers with separate name/URL fields and an add-server button

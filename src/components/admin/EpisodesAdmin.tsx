@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/lib/db";
-import { parseVideo } from "@/lib/api";
+import { formatServers, parseVideo, serverInputs } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { adminSeriesQuery } from "./SeriesAdmin";
 import { Button, ConfirmDelete, errToast, Field, ImageUpload, selectCls } from "./shared";
 
-type Form = { id?: string; season_number: number; episode_number: number; title: string; description: string; thumbnail_url: string | null; use_series_poster: boolean; video_url: string; duration_minutes: string; is_published: boolean; publish_at: string };
+type Form = { id?: string; season_number: number; episode_number: number; title: string; description: string; thumbnail_url: string | null; use_series_poster: boolean; servers: { name: string; url: string }[]; duration_minutes: string; is_published: boolean; publish_at: string };
 
 function toLocal(iso: string) { const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
 
@@ -42,7 +42,11 @@ export function EpisodesAdmin() {
   const newEp = () => {
     const lastSeason = data?.seasons.at(-1)?.season_number ?? 1;
     const inLast = data?.episodes.filter((e) => seasonNum.get(e.season_id) === lastSeason).length ?? 0;
-    setForm({ season_number: lastSeason, episode_number: inLast + 1, title: "", description: "", thumbnail_url: null, use_series_poster: true, video_url: "", duration_minutes: "", is_published: false, publish_at: toLocal(new Date().toISOString()) });
+    setForm({ season_number: lastSeason, episode_number: inLast + 1, title: "", description: "", thumbnail_url: null, use_series_poster: true, servers: [{ name: "", url: "" }], duration_minutes: "", is_published: false, publish_at: toLocal(new Date().toISOString()) });
+  };
+
+  const updateServer = (index: number, key: "name" | "url", value: string) => {
+    setForm((f) => f ? { ...f, servers: f.servers.map((s, i) => i === index ? { ...s, [key]: value } : s) } : f);
   };
 
   const save = async () => {
@@ -50,7 +54,7 @@ export function EpisodesAdmin() {
     const title = form.title.trim();
     if (!title) return toast.error(t("f_title"));
     if (!form.use_series_poster && !form.thumbnail_url) return toast.error(t("f_thumbnailRequired"));
-    { const bad = form.video_url.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).find((l) => !parseVideo(l.slice(l.lastIndexOf("|") + 1).trim())); if (bad) return toast.error(`${t("f_videoUrl")}: ${bad}`); }
+    { const bad = form.servers.map((s) => s.url.trim()).filter(Boolean).find((url) => !parseVideo(url)); if (bad) return toast.error(`${t("f_serverUrl")}: ${bad}`); }
     if (form.season_number < 1 || form.episode_number < 1) return toast.error(t("f_episodeNumber"));
     setBusy(true);
     let season = data?.seasons.find((s) => s.season_number === form.season_number);
@@ -61,7 +65,7 @@ export function EpisodesAdmin() {
     }
     const row = {
       series_id: sid, season_id: season.id, episode_number: form.episode_number, title: title.slice(0, 200), description: form.description.trim().slice(0, 5000),
-      thumbnail_url: form.use_series_poster ? null : form.thumbnail_url, video_url: form.video_url.trim() || null, duration_minutes: form.duration_minutes ? Math.max(0, Math.min(1000, Number(form.duration_minutes))) : null,
+      thumbnail_url: form.use_series_poster ? null : form.thumbnail_url, video_url: formatServers(form.servers) || null, duration_minutes: form.duration_minutes ? Math.max(0, Math.min(1000, Number(form.duration_minutes))) : null,
       is_published: form.is_published, publish_at: new Date(form.publish_at).toISOString(),
     };
     const r = form.id ? await supabase.from("episodes").update(row).eq("id", form.id) : await supabase.from("episodes").insert(row);
@@ -101,7 +105,7 @@ export function EpisodesAdmin() {
                     <td className="p-3">{e.title}</td>
                     <td className={`p-3 whitespace-nowrap ${scheduled ? "text-primary-glow" : e.is_published ? "text-success" : "text-muted-foreground"}`}>{scheduled ? `${t("f_scheduled")} ${new Date(e.publish_at).toLocaleString()}` : e.is_published ? t("f_published") : t("f_draft")}</td>
                     <td className="p-3 whitespace-nowrap text-end">
-                      <Button size="sm" variant="secondary" onClick={() => setForm({ id: e.id, season_number: seasonNum.get(e.season_id) ?? 1, episode_number: e.episode_number, title: e.title, description: e.description, thumbnail_url: e.thumbnail_url, use_series_poster: !e.thumbnail_url || e.thumbnail_url === selectedSeries?.poster_url, video_url: e.video_url ?? "", duration_minutes: e.duration_minutes?.toString() ?? "", is_published: e.is_published, publish_at: toLocal(e.publish_at) })}><Pencil /></Button>
+                      <Button size="sm" variant="secondary" onClick={() => setForm({ id: e.id, season_number: seasonNum.get(e.season_id) ?? 1, episode_number: e.episode_number, title: e.title, description: e.description, thumbnail_url: e.thumbnail_url, use_series_poster: !e.thumbnail_url || e.thumbnail_url === selectedSeries?.poster_url, servers: serverInputs(e.video_url).length ? serverInputs(e.video_url) : [{ name: "", url: "" }], duration_minutes: e.duration_minutes?.toString() ?? "", is_published: e.is_published, publish_at: toLocal(e.publish_at) })}><Pencil /></Button>
                       <ConfirmDelete onConfirm={() => remove(e.id)}><Button size="sm" variant="ghost" aria-label={t("delete")}><Trash2 className="text-destructive" /></Button></ConfirmDelete>
                     </td>
                   </tr>
@@ -123,7 +127,25 @@ export function EpisodesAdmin() {
               </div>
               <Field label={t("f_title")}><Input value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} /></Field>
               <Field label={t("f_synopsis")}><Textarea rows={3} maxLength={5000} value={form.description} onChange={(e) => set("description", e.target.value)} /></Field>
-              <Field label={t("f_videoUrl")}><Textarea dir="ltr" rows={3} value={form.video_url} maxLength={4000} placeholder={"https://...\nServer 2 | https://..."} onChange={(e) => set("video_url", e.target.value)} /><p className="text-xs text-muted-foreground">{t("f_serversHint")}</p></Field>
+              <div className="space-y-3 rounded-xl border border-border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{t("f_videoUrl")}</span>
+                  <Button variant="secondary" size="sm" onClick={() => set("servers", [...form.servers, { name: "", url: "" }])}><Plus /> {t("f_addServer")}</Button>
+                </div>
+                {form.servers.map((server, index) => (
+                  <div key={index} className="space-y-2 rounded-xl border border-border bg-surface/40 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium">{t("server")} {index + 1}</span>
+                      <Button variant="ghost" size="sm" aria-label={t("f_removeServer")} onClick={() => set("servers", form.servers.filter((_, i) => i !== index))}><Trash2 className="text-destructive" /></Button>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Field label={t("f_serverName")}><Input value={server.name} maxLength={80} placeholder={`${t("server")} ${index + 1}`} onChange={(e) => updateServer(index, "name", e.target.value)} /></Field>
+                      <Field label={t("f_serverUrl")}><Input dir="ltr" value={server.url} maxLength={4000} placeholder="https://..." onChange={(e) => updateServer(index, "url", e.target.value)} /></Field>
+                    </div>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">{t("f_serversHint")}</p>
+              </div>
               <div className="space-y-3 rounded-xl border border-border bg-surface/40 p-3">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={form.use_series_poster} onCheckedChange={(v) => set("use_series_poster", v)} />{t("f_useSeriesPoster")}</label>
                 <p className="text-xs text-muted-foreground">{t("f_seriesPosterHint")}</p>
