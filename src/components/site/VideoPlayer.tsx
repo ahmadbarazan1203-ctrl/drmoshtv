@@ -9,9 +9,10 @@ function fmt(s: number) {
   return `${m}:${x.toString().padStart(2, "0")}`;
 }
 
-export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded }: { url: string | null; poster?: string | null; title: string; onFirstPlay?: () => void; onEnded?: () => void }) {
+export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical = false }: { url: string | null; poster?: string | null; title: string; onFirstPlay?: () => void; onEnded?: () => void; vertical?: boolean }) {
   const { t } = useI18n();
   const src = parseVideo(url);
+  const frameClass = vertical ? "mx-auto aspect-[9/16] w-full max-w-sm rounded-2xl" : "aspect-video w-full rounded-xl";
   const wrap = useRef<HTMLDivElement>(null);
   const v = useRef<HTMLVideoElement>(null);
   const started = useRef(false);
@@ -34,11 +35,11 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded }: { url:
   }, [src, onFirstPlay]);
 
   if (!src) {
-    return <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-surface text-muted-foreground">{t("noVideo")}</div>;
+    return <div className={`${frameClass} flex items-center justify-center bg-surface text-muted-foreground`}>{t("noVideo")}</div>;
   }
   if (src.kind !== "file") {
     return (
-      <div className="aspect-video w-full overflow-hidden rounded-xl bg-black/0 ring-1 ring-border">
+      <div className={`${frameClass} overflow-hidden bg-black/0 ring-1 ring-border`}>
         <iframe src={src.embed} title={title} className="size-full" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
       </div>
     );
@@ -48,7 +49,7 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded }: { url:
   const toggleFs = () => { if (document.fullscreenElement) document.exitFullscreen(); else wrap.current?.requestFullscreen(); };
 
   return (
-    <div ref={wrap} className="group relative aspect-video w-full overflow-hidden rounded-xl bg-background ring-1 ring-border" dir="ltr">
+    <div ref={wrap} className={`${frameClass} group relative overflow-hidden bg-background ring-1 ring-border`} dir="ltr">
       <video
         ref={v}
         src={src.src}

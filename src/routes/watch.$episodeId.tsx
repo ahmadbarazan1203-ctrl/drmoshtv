@@ -82,7 +82,7 @@ function ServerPicker({ raw, poster, title, onFirstPlay, onEnded }: { raw: strin
   const cur = servers[i] ?? servers[0];
   return (
     <div className="space-y-3">
-      <VideoPlayer url={cur?.url ?? null} poster={poster} title={title} onFirstPlay={onFirstPlay} onEnded={onEnded} />
+      <VideoPlayer url={cur?.url ?? null} poster={poster} title={title} onFirstPlay={onFirstPlay} onEnded={onEnded} vertical />
       {servers.length > 1 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">{t("servers")}:</span>
