@@ -131,11 +131,25 @@ export function slugify(v: string) {
 
 export type VideoSource = { kind: "youtube" | "vimeo" | "embed"; embed: string } | { kind: "file"; src: string } | null;
 
-export function parseVideo(url: string | null | undefined): VideoSource {
-  if (!url) return null;
+// Accept a URL, a protocol-free URL, or a complete iframe copied from a video host.
+export function normalizeVideoUrl(input: string | null | undefined): string | null {
+  let raw = (input ?? "").trim();
+  const iframe = raw.match(/<iframe\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+  if (iframe) raw = (iframe[1] ?? iframe[2] ?? iframe[3] ?? "").trim();
+  raw = raw.replace(/&amp;/gi, "&");
+  if (raw.startsWith("//")) raw = `https:${raw}`;
+  else if (raw && !/^[a-z][a-z\d+.-]*:\/\//i.test(raw)) raw = `https://${raw}`;
   let u: URL;
-  try { u = new URL(url); } catch { return null; }
-  if (u.protocol !== "https:") return null;
+  try { u = new URL(raw); } catch { return null; }
+  if (u.protocol === "http:") u.protocol = "https:";
+  if (u.protocol !== "https:" || !u.hostname || u.username || u.password) return null;
+  return u.href;
+}
+
+export function parseVideo(url: string | null | undefined): VideoSource {
+  const normalized = normalizeVideoUrl(url);
+  if (!normalized) return null;
+  const u = new URL(normalized);
   const h = u.hostname.replace(/^www\./, "");
   if (h === "youtube.com" || h === "m.youtube.com" || h === "youtu.be") {
     const id = h === "youtu.be" ? u.pathname.slice(1) : u.searchParams.get("v") ?? u.pathname.split("/").pop();
@@ -165,7 +179,7 @@ export function serverInputs(raw: string | null | undefined): ServerInput[] {
 }
 
 export function formatServers(servers: ServerInput[]): string {
-  return servers.map((s) => ({ name: s.name.trim(), url: s.url.trim() })).filter((s) => s.url)
+  return servers.map((s) => ({ name: s.name.trim(), url: normalizeVideoUrl(s.url) ?? s.url.trim() })).filter((s) => s.url)
     .map((s) => s.name ? `${s.name} | ${s.url}` : s.url).join("\n");
 }
 

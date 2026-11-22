@@ -54,7 +54,7 @@ export function EpisodesAdmin() {
     const title = form.title.trim();
     if (!title) return toast.error(t("f_title"));
     if (!form.use_series_poster && !form.thumbnail_url) return toast.error(t("f_thumbnailRequired"));
-    { const bad = form.servers.map((s) => s.url.trim()).filter(Boolean).find((url) => !parseVideo(url)); if (bad) return toast.error(`${t("f_serverUrl")}: ${bad}`); }
+    if (form.servers.some((s) => s.url.trim() && !parseVideo(s.url))) return toast.error(t("f_invalidVideoUrl"));
     if (form.season_number < 1 || form.episode_number < 1) return toast.error(t("f_episodeNumber"));
     setBusy(true);
     let season = data?.seasons.find((s) => s.season_number === form.season_number);
@@ -140,7 +140,7 @@ export function EpisodesAdmin() {
                     </div>
                     <div className="grid gap-2 sm:grid-cols-2">
                       <Field label={t("f_serverName")}><Input value={server.name} maxLength={80} placeholder={`${t("server")} ${index + 1}`} onChange={(e) => updateServer(index, "name", e.target.value)} /></Field>
-                      <Field label={t("f_serverUrl")}><Input dir="ltr" value={server.url} maxLength={4000} placeholder="https://..." onChange={(e) => updateServer(index, "url", e.target.value)} /></Field>
+                      <Field label={t("f_serverUrl")}><Textarea dir="ltr" rows={2} value={server.url} maxLength={4000} placeholder={'https://...  |  <iframe src="https://..."></iframe>'} onChange={(e) => updateServer(index, "url", e.target.value)} /></Field>
                     </div>
                   </div>
                 ))}

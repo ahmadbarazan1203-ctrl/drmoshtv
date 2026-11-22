@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseImageUrl } from "@/lib/media-url";
-import { formatServers, parseServers, parseVideo, serverInputs } from "@/lib/api";
+import { formatServers, normalizeVideoUrl, parseServers, parseVideo, serverInputs } from "@/lib/api";
 
 describe("External media", () => {
   it("accepts externally hosted images without requiring a filename extension", () => {
@@ -31,5 +31,19 @@ describe("Multiple servers", () => {
   });
   it("accepts HTTPS player links from any external host", () => {
     expect(parseVideo("https://player.example.org/watch/42?quality=hd")).toEqual({ kind: "embed", embed: "https://player.example.org/watch/42?quality=hd" });
+  });
+  it("extracts the external URL from a complete multiline iframe embed code", () => {
+    const code = `<IFRAME\n SRC="https://morencius.com/embed/l6eahvi6e3wg?quality=hd&amp;lang=ar"\n FRAMEBORDER=0 allowfullscreen></IFRAME>`;
+    expect(parseVideo(code)).toEqual({ kind: "embed", embed: "https://morencius.com/embed/l6eahvi6e3wg?quality=hd&lang=ar" });
+    expect(formatServers([{ name: "Main", url: code }])).toBe("Main | https://morencius.com/embed/l6eahvi6e3wg?quality=hd&lang=ar");
+  });
+  it("accepts protocol-free and HTTP player links by normalizing them to HTTPS", () => {
+    expect(normalizeVideoUrl("player.example.org/embed/42")).toBe("https://player.example.org/embed/42");
+    expect(normalizeVideoUrl("//player.example.org/embed/42")).toBe("https://player.example.org/embed/42");
+    expect(normalizeVideoUrl("http://player.example.org/embed/42")).toBe("https://player.example.org/embed/42");
+  });
+  it("rejects unsafe iframe sources instead of rendering embed HTML", () => {
+    expect(parseVideo('<iframe src="javascript:alert(1)"></iframe>')).toBeNull();
+    expect(parseVideo('<iframe src="https://user:pass@example.org/embed/42"></iframe>')).toBeNull();
   });
 });

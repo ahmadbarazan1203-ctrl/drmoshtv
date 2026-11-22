@@ -26,7 +26,10 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 });
 
 describe("Episode server editor", () => {
-  beforeEach(() => insertEpisode.mockResolvedValue({ error: null }));
+  beforeEach(() => {
+    insertEpisode.mockReset();
+    insertEpisode.mockResolvedValue({ error: null });
+  });
 
   it("adds a second server and saves both names and URLs", async () => {
     render(<I18nProvider><EpisodesAdmin /></I18nProvider>);
@@ -35,7 +38,7 @@ describe("Episode server editor", () => {
     fireEvent.click(screen.getByRole("button", { name: "إضافة سيرفر" }));
 
     const names = screen.getAllByLabelText("اسم السيرفر (اختياري)");
-    const urls = screen.getAllByLabelText("رابط السيرفر");
+    const urls = screen.getAllByLabelText("رابط السيرفر أو كود iframe");
     expect(urls).toHaveLength(2);
     fireEvent.change(names[0]!, { target: { value: "Main" } });
     fireEvent.change(urls[0]!, { target: { value: "https://cdn.example.org/episode.mp4" } });
@@ -45,5 +48,18 @@ describe("Episode server editor", () => {
 
     await waitFor(() => expect(insertEpisode).toHaveBeenCalledOnce());
     expect(insertEpisode.mock.calls[0]?.[0].video_url).toBe("Main | https://cdn.example.org/episode.mp4\nBackup | https://player.example.org/watch/42");
+  });
+
+  it("accepts a pasted iframe and saves only its normalized source URL", async () => {
+    render(<I18nProvider><EpisodesAdmin /></I18nProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "حلقة جديدة" }));
+    fireEvent.change(screen.getByLabelText("العنوان"), { target: { value: "حلقة iframe" } });
+    fireEvent.change(screen.getByLabelText("رابط السيرفر أو كود iframe"), {
+      target: { value: '<IFRAME SRC="https://morencius.com/embed/l6eahvi6e3wg" FRAMEBORDER=0 allowfullscreen></IFRAME>' },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "حفظ" }));
+
+    await waitFor(() => expect(insertEpisode).toHaveBeenCalledOnce());
+    expect(insertEpisode.mock.calls[0]?.[0].video_url).toBe("https://morencius.com/embed/l6eahvi6e3wg");
   });
 });
