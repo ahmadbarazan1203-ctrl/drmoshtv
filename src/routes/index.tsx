@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Info, Play } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { Button } from "@/components/ui/button";
-import { EpisodeCard, EpisodeRow, SeriesCard, SeriesRow } from "@/components/site/Cards";
-import { genresQuery, homeQuery, settingsQuery, type SeriesWithGenres } from "@/lib/api";
+import { SeriesCard, SeriesRow } from "@/components/site/Cards";
+import { genresQuery, homeQuery } from "@/lib/api";
+import { seriesForGenre, seriesForGroup, splitSeriesByAdded, type HomeSection } from "@/lib/home-sections";
 import { genreName, useI18n, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
@@ -22,95 +24,134 @@ export const Route = createFileRoute("/")({
     await Promise.all([
       context.queryClient.ensureQueryData(homeQuery),
       context.queryClient.ensureQueryData(genresQuery),
-      context.queryClient.ensureQueryData(settingsQuery),
     ]);
   },
   component: Home,
 });
 
+const NAV_ITEMS: { id: HomeSection; label: TKey }[] = [
+  { id: "all", label: "allSeries" },
+  { id: "arabic", label: "arabicSeries" },
+  { id: "foreign", label: "foreignSeries" },
+  { id: "genres", label: "genres" },
+  { id: "special", label: "specialCollection" },
+];
+
 function Home() {
   const { t, lang } = useI18n();
   const { data } = useSuspenseQuery(homeQuery);
   const { data: genres } = useSuspenseQuery(genresQuery);
-  const { data: settings } = useQuery(settingsQuery);
+  const [section, setSection] = useState<HomeSection>("all");
+  const [genreId, setGenreId] = useState("");
   const all = data.series;
-  const hero = all.find((s) => s.id === data.heroId) ?? all[0];
-  const byViews = [...all].sort((a, b) => b.views - a.views);
-  const latest = all.filter((s) => s.is_latest);
-  const sections: Record<string, { title: TKey; items: SeriesWithGenres[] } | "episodes" | "genres"> = {
-    latest: { title: "latest", items: latest.length ? latest : all.slice(0, 15) },
-    trending: { title: "trending", items: all.filter((s) => s.is_trending) },
-    popular: { title: "popular", items: byViews.filter((s) => s.views > 0).slice(0, 15) },
-    recent_episodes: "episodes",
-    recommended: { title: "recommended", items: byViews.slice(0, 20).filter((s) => s.id !== hero?.id).slice(5, 20) },
-    originals: { title: "originals", items: all.filter((s) => s.is_original) },
-    genres: "genres",
+  const hero = all.find((item) => item.id === data.heroId) ?? all[0];
+  const { recent, older } = splitSeriesByAdded(all);
+  const selectedGenre = genres.find((genre) => genre.id === genreId);
+  const visibleSeries = section === "genres"
+    ? genreId ? seriesForGenre(all, genreId) : []
+    : section === "all" ? [] : seriesForGroup(all, genres, section);
+  const visibleTitle = section === "genres"
+    ? selectedGenre ? genreName(selectedGenre, lang) : t("genres")
+    : section === "all" ? "" : t(NAV_ITEMS.find((item) => item.id === section)?.label ?? "allSeries");
+
+  const selectSection = (next: HomeSection) => {
+    setSection(next);
+    if (next !== "genres") setGenreId("");
   };
-  const order = settings?.section_order ?? Object.keys(sections);
-  const usedGenres = genres.filter((g) => all.some((s) => s.series_genres.some((x) => x.genre_id === g.id)));
 
   return (
     <div>
-      <section className="relative flex min-h-[78vh] items-end overflow-hidden md:min-h-[88vh]">
-        <img referrerPolicy="no-referrer" src={hero?.cover_url ?? heroBg} alt="" width={1920} height={1088} className="absolute inset-0 size-full object-cover" />
-        <div className="absolute inset-0 bg-fade-bottom" />
-        <div className="absolute inset-0 bg-fade-side" />
-        <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-16 md:px-8 md:pb-24">
-          {hero ? (
-            <div className="max-w-2xl animate-rise space-y-4">
-              {hero.is_original && <p className="text-sm font-medium tracking-widest text-primary-glow">{t("originals")}</p>}
-              <h1 className="text-4xl font-bold leading-tight md:text-6xl">{hero.title}</h1>
-              <p className="text-sm text-muted-foreground">
-                {[hero.release_year, ...hero.series_genres.map((x) => genres.find((g) => g.id === x.genre_id)).filter(Boolean).slice(0, 3).map((g) => genreName(g!, lang))].filter(Boolean).join(" · ")}
-              </p>
-              <p className="line-clamp-3 text-base text-foreground/85 md:text-lg">{hero.synopsis}</p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button asChild variant="hero" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }} hash="episodes"><Play className="fill-current" /> {t("watchNow")}</Link></Button>
-                <Button asChild variant="glass" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }}><Info /> {t("moreInfo")}</Link></Button>
-              </div>
-            </div>
-          ) : (
-            <div className="max-w-2xl animate-rise space-y-4">
-              <h1 className="text-5xl font-bold md:text-7xl"><span className="text-gradient">{t("brand")}</span></h1>
-              <p className="text-lg text-foreground/85">{t("tagline")}</p>
-              <p className="text-muted-foreground">{t("emptyCatalog")}</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <div className="relative z-10 -mt-8 space-y-10">
-        {order.map((key) => {
-          const sec = sections[key];
-          if (!sec) return null;
-          if (sec === "episodes") {
-            if (!data.episodes.length) return null;
-            return (
-              <EpisodeRow key={key} title={t("recent_episodes")}>
-                {data.episodes.map((e) => { const parent = e.series as { title: string; poster_url: string | null } | null; return <EpisodeCard key={e.id} e={e} seriesTitle={parent?.title} seriesPoster={parent?.poster_url} />; })}
-              </EpisodeRow>
-            );
-          }
-          if (sec === "genres") {
-            if (!usedGenres.length) return null;
-            return (
-              <section key={key} className="space-y-3 px-4 md:px-8">
-                <h2 className="text-lg font-semibold md:text-xl">{t("genres")}</h2>
-                <div className="flex flex-wrap gap-2">
-                  {usedGenres.map((g) => (
-                    <Link key={g.id} to="/search" search={{ q: "", genre: g.slug, sort: "newest" }} className="rounded-full border border-border bg-surface px-4 py-2 text-sm transition hover:border-primary hover:bg-accent">{genreName(g, lang)}</Link>
-                  ))}
+      {section === "all" && (
+        <section className="relative flex min-h-[78vh] items-end overflow-hidden md:min-h-[88vh]">
+          <img referrerPolicy="no-referrer" src={hero?.cover_url ?? heroBg} alt="" width={1920} height={1088} className="absolute inset-0 size-full object-cover" />
+          <div className="absolute inset-0 bg-fade-bottom" />
+          <div className="absolute inset-0 bg-fade-side" />
+          <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-16 md:px-8 md:pb-24">
+            {hero ? (
+              <div className="max-w-2xl animate-rise space-y-4">
+                {hero.is_original && <p className="text-sm font-medium tracking-widest text-primary-glow">{t("originals")}</p>}
+                <h1 className="text-4xl font-bold leading-tight md:text-6xl">{hero.title}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {[hero.release_year, ...hero.series_genres.map((item) => genres.find((genre) => genre.id === item.genre_id)).filter(Boolean).slice(0, 3).map((genre) => genreName(genre!, lang))].filter(Boolean).join(" · ")}
+                </p>
+                <p className="line-clamp-3 text-base text-foreground/85 md:text-lg">{hero.synopsis}</p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Button asChild variant="hero" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }} hash="episodes"><Play className="fill-current" /> {t("watchNow")}</Link></Button>
+                  <Button asChild variant="glass" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }}><Info /> {t("moreInfo")}</Link></Button>
                 </div>
-              </section>
-            );
-          }
-          if (!sec.items.length) return null;
-          return (
-            <SeriesRow key={key} title={t(sec.title)}>
-              {sec.items.map((s) => <SeriesCard key={s.id} s={s} genres={genres} />)}
-            </SeriesRow>
-          );
-        })}
+              </div>
+            ) : (
+              <div className="max-w-2xl animate-rise space-y-4">
+                <h1 className="text-5xl font-bold md:text-7xl"><span className="text-gradient">{t("brand")}</span></h1>
+                <p className="text-lg text-foreground/85">{t("tagline")}</p>
+                <p className="text-muted-foreground">{t("emptyCatalog")}</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      <div className={section === "all" ? "relative z-10 -mt-8" : "pt-24"}>
+        <nav aria-label={t("browse")} className="mx-auto max-w-[1600px] px-4 md:px-8">
+          <div className="scrollbar-none flex gap-2 overflow-x-auto pb-2">
+            {NAV_ITEMS.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                aria-pressed={section === item.id}
+                onClick={() => selectSection(item.id)}
+                className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${section === item.id ? "border-primary bg-gradient-primary text-primary-foreground shadow-glow" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-foreground"}`}
+              >
+                {t(item.label)}
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        {section === "all" ? (
+          <div className="mt-8 space-y-10">
+            {recent.length > 0 && (
+              <SeriesRow title={t("recentlyAdded")}>
+                {recent.map((item) => <SeriesCard key={item.id} s={item} genres={genres} />)}
+              </SeriesRow>
+            )}
+            {older.length > 0 && (
+              <SeriesRow title={t("olderSeries")}>
+                {older.map((item) => <SeriesCard key={item.id} s={item} genres={genres} />)}
+              </SeriesRow>
+            )}
+          </div>
+        ) : (
+          <div className="mx-auto mt-8 max-w-[1600px] space-y-6">
+            {section === "genres" && (
+              <div className="flex flex-wrap gap-2 px-4 md:px-8">
+                {genres.map((genre) => (
+                  <button
+                    type="button"
+                    key={genre.id}
+                    aria-pressed={genreId === genre.id}
+                    onClick={() => setGenreId(genre.id)}
+                    className={`rounded-full border px-4 py-2 text-sm transition ${genreId === genre.id ? "border-primary bg-gradient-primary text-primary-foreground" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-foreground"}`}
+                  >
+                    {genreName(genre, lang)}
+                  </button>
+                ))}
+              </div>
+            )}
+            <section className="space-y-4">
+              <h2 className="px-4 text-lg font-semibold md:px-8 md:text-xl">{visibleTitle}</h2>
+              {section === "genres" && !genreId ? (
+                <p className="px-4 text-muted-foreground md:px-8">{t("chooseGenre")}</p>
+              ) : visibleSeries.length === 0 ? (
+                <p className="px-4 text-muted-foreground md:px-8">{t("noResults")}</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-3 gap-y-7 px-4 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:px-8 lg:grid-cols-5 xl:grid-cols-6">
+                  {visibleSeries.map((item) => <SeriesCard key={item.id} s={item} genres={genres} />)}
+                </div>
+              )}
+            </section>
+          </div>
+        )}
       </div>
     </div>
   );

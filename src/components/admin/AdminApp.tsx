@@ -1,7 +1,7 @@
 import { setupAdminAccount } from "@/lib/admin-setup.functions";
 import { useState } from "react";
 import { toast } from "sonner";
-import { BarChart3, Film, Home, LayoutDashboard, ListVideo, LogOut, Settings, Users } from "lucide-react";
+import { BarChart3, Film, Home, LayoutDashboard, ListVideo, LogOut, Settings, Tags, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/site/Logo";
