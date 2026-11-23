@@ -32,6 +32,11 @@ describe("Multiple servers", () => {
   it("accepts HTTPS player links from any external host", () => {
     expect(parseVideo("https://player.example.org/watch/42?quality=hd")).toEqual({ kind: "embed", embed: "https://player.example.org/watch/42?quality=hd" });
   });
+  it("keeps Upbolt, Voe and Vidara /e/ player links unchanged", () => {
+    expect(parseVideo('<iframe src="https://upbolt.to/e/iou6ymk4dd73" allowfullscreen></iframe>')).toEqual({ kind: "embed", embed: "https://upbolt.to/e/iou6ymk4dd73" });
+    expect(parseVideo("https://voe.sx/e/kxvjsnzvwuuj")).toEqual({ kind: "embed", embed: "https://voe.sx/e/kxvjsnzvwuuj" });
+    expect(parseVideo('<iframe src="https://vidara.to/e/BLGvjouxfMa1q" width="640" height="360" frameborder="0" allowfullscreen></iframe>')).toEqual({ kind: "embed", embed: "https://vidara.to/e/BLGvjouxfMa1q" });
+  });
   it("extracts the external URL from a complete multiline iframe embed code", () => {
     const code = `<IFRAME\n SRC="https://morencius.com/embed/l6eahvi6e3wg?quality=hd&amp;lang=ar"\n FRAMEBORDER=0 allowfullscreen></IFRAME>`;
     expect(parseVideo(code)).toEqual({ kind: "embed", embed: "https://morencius.com/embed/l6eahvi6e3wg?quality=hd&lang=ar" });

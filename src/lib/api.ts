@@ -162,8 +162,10 @@ export function parseVideo(url: string | null | undefined): VideoSource {
     return null;
   }
   if (/\.(mp4|webm|m4v|mov|ogv|ogg|m3u8)$/i.test(u.pathname)) return { kind: "file", src: u.href };
+  // Upbolt, Voe, Vidara and similar hosts already use /e/ for their playable embed.
+  if (/^\/e\/[\w-]+\/?$/i.test(u.pathname)) return { kind: "embed", embed: u.href };
   // VidHide-style hosts: share links (/v/, /f/, /d/, /file/) become embed links.
-  const m = u.pathname.match(/^\/(?:v|f|d|file|e)\/([\w-]+)/);
+  const m = u.pathname.match(/^\/(?:v|f|d|file)\/([\w-]+)/);
   if (m) return { kind: "embed", embed: `${u.origin}/embed/${m[1]}` };
   return { kind: "embed", embed: u.href };
 }
