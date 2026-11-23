@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { Overview } from "./Overview";
 import { SeriesAdmin } from "./SeriesAdmin";
+import { GenresAdmin } from "./GenresAdmin";
 import { EpisodesAdmin } from "./EpisodesAdmin";
 import { HomepageAdmin } from "./HomepageAdmin";
 import { UsersAdmin } from "./UsersAdmin";

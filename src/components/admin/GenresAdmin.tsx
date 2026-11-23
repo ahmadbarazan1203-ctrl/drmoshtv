@@ -33,7 +33,10 @@ export function GenresAdmin() {
   const save = async () => {
     if (!form) return;
     const nameAr = form.name_ar.trim();
-    if (!nameAr) return toast.error(t("f_genreNameRequired"));
+    if (!nameAr) {
+      toast.error(t("f_genreNameRequired"));
+      return;
+    }
     const group = genreGroup({ ...form, slug: form.slug.trim() });
     const slug = slugify(form.slug) || slugify(form.name_en) || group || `genre-${Date.now().toString(36)}`;
     const row = {
