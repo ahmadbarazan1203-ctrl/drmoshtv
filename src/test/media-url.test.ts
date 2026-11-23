@@ -37,6 +37,13 @@ describe("Multiple servers", () => {
     expect(parseVideo("https://voe.sx/e/kxvjsnzvwuuj")).toEqual({ kind: "embed", embed: "https://voe.sx/e/kxvjsnzvwuuj" });
     expect(parseVideo('<iframe src="https://vidara.to/e/BLGvjouxfMa1q" width="640" height="360" frameborder="0" allowfullscreen></iframe>')).toEqual({ kind: "embed", embed: "https://vidara.to/e/BLGvjouxfMa1q" });
   });
+  it("supports Earnvids embed codes and share links", () => {
+    const code = '<IFRAME SRC="https://morencius.com/embed/j1j2pnpsig1l" FRAMEBORDER=0 MARGINWIDTH=0 MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>';
+    expect(parseVideo(code)).toEqual({ kind: "embed", embed: "https://morencius.com/embed/j1j2pnpsig1l" });
+    expect(parseVideo("https://morencius.com/embed/j1j2pnpsig1l")).toEqual({ kind: "embed", embed: "https://morencius.com/embed/j1j2pnpsig1l" });
+    expect(parseVideo("https://earnvids.com/v/j1j2pnpsig1l")).toEqual({ kind: "embed", embed: "https://morencius.com/embed/j1j2pnpsig1l" });
+    expect(formatServers([{ name: "Earnvids", url: code }])).toBe("Earnvids | https://morencius.com/embed/j1j2pnpsig1l");
+  });
   it("extracts the external URL from a complete multiline iframe embed code", () => {
     const code = `<IFRAME\n SRC="https://morencius.com/embed/l6eahvi6e3wg?quality=hd&amp;lang=ar"\n FRAMEBORDER=0 allowfullscreen></IFRAME>`;
     expect(parseVideo(code)).toEqual({ kind: "embed", embed: "https://morencius.com/embed/l6eahvi6e3wg?quality=hd&lang=ar" });

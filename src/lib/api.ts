@@ -162,6 +162,14 @@ export function parseVideo(url: string | null | undefined): VideoSource {
     return null;
   }
   if (/\.(mp4|webm|m4v|mov|ogv|ogg|m3u8)$/i.test(u.pathname)) return { kind: "file", src: u.href };
+  // Earnvids: the player is served from morencius.com; keep its embed links and
+  // convert earnvids share links to that embed form.
+  if (/(?:^|\.)(?:earnvids?|earnvidsapi|morencius)\.(?:com|net|io|site|to)$/i.test(h)) {
+    if (/^\/(?:embed|e)\/[\w-]+/i.test(u.pathname)) return { kind: "embed", embed: u.href };
+    const id = u.pathname.match(/^\/(?:v|f|d|file|watch)?\/?([\w-]{6,})\/?$/i)?.[1];
+    if (id) return { kind: "embed", embed: `https://morencius.com/embed/${id}` };
+    return { kind: "embed", embed: u.href };
+  }
   // Upbolt, Voe, Vidara and similar hosts already use /e/ for their playable embed.
   if (/^\/e\/[\w-]+\/?$/i.test(u.pathname)) return { kind: "embed", embed: u.href };
   // VidHide-style hosts: share links (/v/, /f/, /d/, /file/) become embed links.
