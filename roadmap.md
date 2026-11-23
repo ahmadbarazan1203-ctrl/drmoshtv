@@ -13,3 +13,5 @@
 - [x] Manage episode servers with separate name/URL fields and an add-server button
 - [x] Display the episode player in a centered TikTok-style 9:16 portrait frame
 - [x] Accept full iframe embed codes and normalize external video links in episode servers
+- [ ] Reorganize the homepage into series-only recent/older sections with responsive category navigation
+- [ ] Add admin CRUD for custom genres without changing the database schema or existing content
