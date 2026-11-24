@@ -18,3 +18,5 @@
 - [x] Let admins create and assign a new genre directly from the series form
 - [x] Autoplay episodes on entry and advance automatically when an episode ends
 - [x] Add TikTok-style swipe navigation between previous and next episodes
+- [ ] Keep ordered previous/next and fullscreen controls visible for every server, including while fullscreen
+- [ ] Advance immediately and only once on supported player end notifications

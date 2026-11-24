@@ -129,6 +129,8 @@ const D = {
   f_newGenreInline: ["اكتب اسم تصنيف جديد", "Enter a new genre name", "Saisissez un nouveau genre", "Yeni tür adını yazın"],
   swipeEpisodes: ["اسحب للأعلى للحلقة التالية وللأسفل للسابقة", "Swipe up for the next episode and down for the previous one", "Balayez vers le haut pour l’épisode suivant et vers le bas pour le précédent", "Sonraki bölüm için yukarı, önceki bölüm için aşağı kaydırın"],
   autoplayMuted: ["يبدأ التشغيل تلقائياً بصوت مكتوم؛ يمكنك تشغيل الصوت من أزرار المشغل.", "Playback starts muted automatically; use the player controls to enable sound.", "La lecture démarre automatiquement sans son ; activez-le avec les commandes du lecteur.", "Oynatma otomatik olarak sessiz başlar; sesi oynatıcı kontrollerinden açabilirsiniz."],
+  fullscreen: ["ملء الشاشة", "Fullscreen", "Plein écran", "Tam ekran"],
+  exitFullscreen: ["الخروج من ملء الشاشة", "Exit fullscreen", "Quitter le plein écran", "Tam ekrandan çık"],
   adm_episodes: ["الحلقات", "Episodes", "Épisodes", "Bölümler"],
   adm_home: ["الصفحة الرئيسية", "Homepage", "Accueil", "Ana sayfa"],
   adm_users: ["المستخدمون", "Users", "Utilisateurs", "Kullanıcılar"],

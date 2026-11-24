@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/lib/db";
 import type { Database } from "@/integrations/supabase/types";
+import { episodeNeighbors, orderEpisodes } from "@/lib/playback";
 
 export type Series = Database["public"]["Tables"]["series"]["Row"];
 export type Episode = Database["public"]["Tables"]["episodes"]["Row"];
@@ -105,16 +106,14 @@ export const episodeQuery = (id: string) =>
         supabase.from("episodes").select("*").eq("series_id", ep.series_id).eq("is_published", true).lte("publish_at", new Date().toISOString()),
       ]);
       const seasonNum = new Map((seasons.data ?? []).map((s) => [s.id, s.season_number]));
-      const ordered = (all.data ?? []).sort(
-        (a, b) => (seasonNum.get(a.season_id) ?? 0) - (seasonNum.get(b.season_id) ?? 0) || a.episode_number - b.episode_number,
-      );
-      const idx = ordered.findIndex((e) => e.id === ep.id);
+      const ordered = orderEpisodes(all.data ?? [], seasons.data ?? []);
+      const { prev, next } = episodeNeighbors(ordered, ep.id);
       return {
         episode: ep,
         series: series.data,
         seasonNumber: seasonNum.get(ep.season_id) ?? 1,
-        prev: idx > 0 ? ordered[idx - 1] : null,
-        next: idx >= 0 && idx < ordered.length - 1 ? ordered[idx + 1] : null,
+        prev,
+        next,
         all: ordered,
         seasonNum: Object.fromEntries(seasonNum),
       };
