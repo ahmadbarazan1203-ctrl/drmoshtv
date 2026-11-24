@@ -10,6 +10,7 @@ import { supabase } from "@/lib/db";
 import { castOf, genresQuery, slugify, type Series } from "@/lib/api";
 import { genreName, useI18n } from "@/lib/i18n";
 import { Button, ConfirmDelete, errToast, Field, ImageUpload, selectCls } from "./shared";
+import { GenreQuickAdd } from "./GenreQuickAdd";
 
 type Form = {
   id?: string; title: string; slug: string; synopsis: string; poster_url: string | null; cover_url: string | null; trailer_url: string;
@@ -124,6 +125,7 @@ export function SeriesAdmin() {
                       <button type="button" key={g.id} onClick={() => set("genres", on ? form.genres.filter((x) => x !== g.id) : [...form.genres, g.id])} className={`rounded-full px-3 py-1 text-xs ${on ? "bg-gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>{genreName(g, lang)}</button>
                     ); })}
                   </div>
+                  <GenreQuickAdd onCreated={(genre) => set("genres", [...new Set([...form.genres, genre.id])])} />
                 </div>
                 <Field label={t("f_cast")}><Textarea rows={3} value={form.cast} onChange={(e) => set("cast", e.target.value)} /></Field>
                 <div className="grid grid-cols-2 gap-3 text-sm">

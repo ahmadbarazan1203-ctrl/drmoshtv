@@ -2,6 +2,7 @@ import { Maximize, Minimize, Pause, Play, Volume2, VolumeX } from "lucide-react"
 import { useEffect, useRef, useState } from "react";
 import { parseVideo } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { autoplayEmbed, playerEnded } from "@/lib/playback";
 
 function fmt(s: number) {
   if (!isFinite(s)) return "0:00";
@@ -9,7 +10,7 @@ function fmt(s: number) {
   return `${m}:${x.toString().padStart(2, "0")}`;
 }
 
-export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical = false }: { url: string | null; poster?: string | null; title: string; onFirstPlay?: () => void; onEnded?: () => void; vertical?: boolean }) {
+export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical = false, autoPlay = false }: { url: string | null; poster?: string | null; title: string; onFirstPlay?: () => void; onEnded?: () => void; vertical?: boolean; autoPlay?: boolean }) {
   const { t } = useI18n();
   const src = parseVideo(url);
   const frameClass = vertical ? "mx-auto aspect-[9/16] w-full max-w-sm rounded-2xl" : "aspect-video w-full rounded-xl";
@@ -20,7 +21,7 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical
   const [time, setTime] = useState(0);
   const [dur, setDur] = useState(0);
   const [vol, setVol] = useState(1);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(autoPlay);
   const [fs, setFs] = useState(false);
   const [rate, setRate] = useState(1);
 
@@ -29,10 +30,19 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical
     document.addEventListener("fullscreenchange", on);
     return () => document.removeEventListener("fullscreenchange", on);
   }, []);
-  useEffect(() => { started.current = false; setPlaying(false); setTime(0); }, [url]);
+  useEffect(() => { started.current = false; setPlaying(false); setTime(0); setMuted(autoPlay); }, [url, autoPlay]);
   useEffect(() => {
     if (src && src.kind !== "file" && !started.current) { started.current = true; onFirstPlay?.(); }
   }, [src, onFirstPlay]);
+  useEffect(() => {
+    if (!src || src.kind === "file" || !onEnded) return;
+    const origin = new URL(src.embed).origin;
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin === origin && playerEnded(event.data)) onEnded();
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [src, onEnded]);
 
   if (!src) {
     return <div className={`${frameClass} flex items-center justify-center bg-surface text-muted-foreground`}>{t("noVideo")}</div>;
@@ -40,7 +50,7 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical
   if (src.kind !== "file") {
     return (
       <div className={`${frameClass} overflow-hidden bg-black/0 ring-1 ring-border`}>
-        <iframe src={src.embed} title={title} className="size-full" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+        <iframe src={autoPlay ? autoplayEmbed(src.embed) : src.embed} title={title} className="size-full" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
       </div>
     );
   }
@@ -56,6 +66,9 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical
         poster={poster ?? undefined}
         className="size-full"
         playsInline
+        autoPlay={autoPlay}
+        muted={muted}
+        onCanPlay={(event) => { if (autoPlay && event.currentTarget.paused) void event.currentTarget.play().catch(() => {}); }}
         onClick={toggle}
         onPlay={() => { setPlaying(true); if (!started.current) { started.current = true; onFirstPlay?.(); } }}
         onPause={() => setPlaying(false)}

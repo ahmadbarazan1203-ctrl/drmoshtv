@@ -21,6 +21,7 @@ import { SettingsAdmin } from "./SettingsAdmin";
 const TABS: { id: string; label: TKey; icon: typeof Film }[] = [
   { id: "overview", label: "adm_overview", icon: LayoutDashboard },
   { id: "series", label: "adm_series", icon: Film },
+  { id: "genres", label: "adm_genres", icon: Tags },
   { id: "episodes", label: "adm_episodes", icon: ListVideo },
   { id: "home", label: "adm_home", icon: Home },
   { id: "users", label: "adm_users", icon: Users },
@@ -65,6 +66,7 @@ export function AdminApp() {
         </div>
         {tab === "overview" && <Overview />}
         {tab === "series" && <SeriesAdmin />}
+        {tab === "genres" && <GenresAdmin />}
         {tab === "episodes" && <EpisodesAdmin />}
         {tab === "home" && <HomepageAdmin />}
         {tab === "users" && <UsersAdmin />}
