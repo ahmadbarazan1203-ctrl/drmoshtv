@@ -42,7 +42,19 @@ export function EpisodesAdmin() {
   const newEp = () => {
     const lastSeason = data?.seasons.at(-1)?.season_number ?? 1;
     const inLast = data?.episodes.filter((e) => seasonNum.get(e.season_id) === lastSeason).length ?? 0;
-    setForm({ season_number: lastSeason, episode_number: inLast + 1, title: "", description: "", thumbnail_url: null, use_series_poster: true, servers: [{ name: "", url: "" }], duration_minutes: "", is_published: false, publish_at: toLocal(new Date().toISOString()) });
+    const isFirst = (data?.episodes.length ?? 0) === 0;
+    setForm({
+      season_number: lastSeason,
+      episode_number: inLast + 1,
+      title: isFirst ? selectedSeries?.title ?? "" : "",
+      description: isFirst ? selectedSeries?.synopsis ?? "" : "",
+      thumbnail_url: null,
+      use_series_poster: true,
+      servers: [{ name: "", url: "" }],
+      duration_minutes: "",
+      is_published: false,
+      publish_at: toLocal(new Date().toISOString()),
+    });
   };
 
   const updateServer = (index: number, key: "name" | "url", value: string) => {

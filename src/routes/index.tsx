@@ -76,8 +76,8 @@ function Home() {
                 </p>
                 <p className="line-clamp-3 text-base text-foreground/85 md:text-lg">{hero.synopsis}</p>
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button asChild variant="hero" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }} hash="episodes"><Play className="fill-current" /> {t("watchNow")}</Link></Button>
-                  <Button asChild variant="glass" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }}><Info /> {t("moreInfo")}</Link></Button>
+                  <Button asChild variant="hero" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }}><Play className="fill-current" /> {t("watchNow")}</Link></Button>
+                  <Button asChild variant="glass" size="lg"><Link to="/series/$slug" params={{ slug: hero.slug }} search={{ details: true }}><Info /> {t("moreInfo")}</Link></Button>
                 </div>
               </div>
             ) : (

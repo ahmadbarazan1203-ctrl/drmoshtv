@@ -100,22 +100,31 @@ export const episodeQuery = (id: string) =>
       const { data: ep, error } = await supabase.from("episodes").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
       if (!ep) return null;
-      const [series, seasons, all] = await Promise.all([
-        supabase.from("series").select("*").eq("id", ep.series_id).maybeSingle(),
+      const [series, seasons, all, related] = await Promise.all([
+        supabase.from("series").select(SERIES_SEL).eq("id", ep.series_id).maybeSingle(),
         supabase.from("seasons").select("*").eq("series_id", ep.series_id).order("season_number"),
         supabase.from("episodes").select("*").eq("series_id", ep.series_id).eq("is_published", true).lte("publish_at", new Date().toISOString()),
+        supabase.from("series").select(SERIES_SEL).eq("is_published", true).neq("id", ep.series_id).order("views", { ascending: false }).limit(30),
       ]);
       const seasonNum = new Map((seasons.data ?? []).map((s) => [s.id, s.season_number]));
       const ordered = orderEpisodes(all.data ?? [], seasons.data ?? []);
       const { prev, next } = episodeNeighbors(ordered, ep.id);
+      const s = series.data as SeriesWithGenres | null;
+      const gids = new Set((s?.series_genres ?? []).map((g) => g.genre_id));
+      const rel = ((related.data ?? []) as SeriesWithGenres[])
+        .map((r) => ({ r, score: r.series_genres.filter((g) => gids.has(g.genre_id)).length }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 12)
+        .map((x) => x.r);
       return {
         episode: ep,
-        series: series.data,
+        series: s,
         seasonNumber: seasonNum.get(ep.season_id) ?? 1,
         prev,
         next,
         all: ordered,
         seasonNum: Object.fromEntries(seasonNum),
+        related: rel,
       };
     },
   });

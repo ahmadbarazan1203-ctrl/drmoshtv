@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Play } from "lucide-react";
 import { useState } from "react";
@@ -7,14 +7,22 @@ import { EpisodeCard, SeriesCard, SeriesRow } from "@/components/site/Cards";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
 import { castOf, genresQuery, seriesQuery } from "@/lib/api";
 import { genreName, useI18n } from "@/lib/i18n";
+import { firstEpisode } from "@/lib/playback";
 
 export const Route = createFileRoute("/series/$slug")({
-  loader: async ({ context, params }) => {
+  validateSearch: (s: Record<string, unknown>): { details?: boolean } =>
+    s["details"] === true || s["details"] === "1" ? { details: true } : {},
+  loaderDeps: ({ search }) => ({ details: Boolean(search.details) }),
+  loader: async ({ context, params, deps }) => {
     const [d] = await Promise.all([
       context.queryClient.ensureQueryData(seriesQuery(params.slug)),
       context.queryClient.ensureQueryData(genresQuery),
     ]);
     if (!d) throw notFound();
+    const first = firstEpisode(d.episodes, d.seasons);
+    if (!deps.details && first) {
+      throw redirect({ to: "/watch/$episodeId", params: { episodeId: first.id }, replace: true });
+    }
     return { title: d.series.title, synopsis: d.series.synopsis, image: d.series.cover_url ?? d.series.poster_url };
   },
   head: ({ loaderData }) => {
@@ -47,7 +55,7 @@ function SeriesPage() {
   const eps = episodes.filter((e) => e.season_id === active);
   const sGenres = s.series_genres.map((x) => genres.find((g) => g.id === x.genre_id)).filter((g) => !!g);
   const cast = castOf(s);
-  const first = seasonsWithEps.length ? episodes.find((e) => e.season_id === seasonsWithEps[0]?.id) : undefined;
+  const first = firstEpisode(episodes, seasons);
 
   return (
     <div>

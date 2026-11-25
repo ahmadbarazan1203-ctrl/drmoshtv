@@ -20,7 +20,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
     ...actual,
     useQueryClient: () => ({ invalidateQueries: vi.fn() }),
     useQuery: ({ queryKey }: { queryKey: string[] }) => queryKey[1] === "series"
-      ? { data: [{ id: "series-1", title: "Test series", poster_url: null }] }
+      ? { data: [{ id: "series-1", title: "Test series", synopsis: "Full story synopsis", poster_url: null }] }
       : { data: { seasons: [{ id: "season-1", season_number: 1 }], episodes: [] } },
   };
 });
@@ -61,5 +61,12 @@ describe("Episode server editor", () => {
 
     await waitFor(() => expect(insertEpisode).toHaveBeenCalledOnce());
     expect(insertEpisode.mock.calls[0]?.[0].video_url).toBe("https://morencius.com/embed/l6eahvi6e3wg");
+  });
+
+  it("pre-fills the series title and synopsis for the first episode of a single-episode series", () => {
+    render(<I18nProvider><EpisodesAdmin /></I18nProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "حلقة جديدة" }));
+    expect(screen.getByLabelText("العنوان")).toHaveValue("Test series");
+    expect(screen.getByLabelText("الوصف")).toHaveValue("Full story synopsis");
   });
 });

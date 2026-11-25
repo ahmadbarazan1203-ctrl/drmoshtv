@@ -18,5 +18,6 @@
 - [x] Let admins create and assign a new genre directly from the series form
 - [x] Autoplay episodes on entry and advance automatically when an episode ends
 - [x] Add TikTok-style swipe navigation between previous and next episodes
-- [ ] Keep ordered previous/next and fullscreen controls visible for every server, including while fullscreen
-- [ ] Advance immediately and only once on supported player end notifications
+- [x] Open a series directly into its first published episode (keep details page reachable for details view or series without episodes)
+- [x] Remove TikTok-style swipe/wheel flipping and auto-advance on end, and adapt the watch page and admin defaults for single-episode movie-style series
+- [x] Keep the episode video player in a centered 9:16 vertical frame (TikTok-style) for AI series without swipe/flipping

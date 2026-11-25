@@ -2,7 +2,7 @@ import { Maximize, Minimize, Pause, Play, Volume2, VolumeX } from "lucide-react"
 import { useEffect, useRef, useState } from "react";
 import { parseVideo } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
-import { autoplayEmbed, playerEnded } from "@/lib/playback";
+import { autoplayEmbed } from "@/lib/playback";
 
 function fmt(s: number) {
   if (!isFinite(s)) return "0:00";
@@ -10,7 +10,7 @@ function fmt(s: number) {
   return `${m}:${x.toString().padStart(2, "0")}`;
 }
 
-export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical = false, autoPlay = false }: { url: string | null; poster?: string | null; title: string; onFirstPlay?: () => void; onEnded?: () => void; vertical?: boolean; autoPlay?: boolean }) {
+export function VideoPlayer({ url, poster, title, onFirstPlay, vertical = false, autoPlay = false }: { url: string | null; poster?: string | null; title: string; onFirstPlay?: () => void; vertical?: boolean; autoPlay?: boolean }) {
   const { t } = useI18n();
   const src = parseVideo(url);
   const frameClass = vertical ? "mx-auto aspect-[9/16] w-full max-w-sm rounded-2xl" : "aspect-video w-full rounded-xl";
@@ -34,15 +34,6 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical
   useEffect(() => {
     if (src && src.kind !== "file" && !started.current) { started.current = true; onFirstPlay?.(); }
   }, [src, onFirstPlay]);
-  useEffect(() => {
-    if (!src || src.kind === "file" || !onEnded) return;
-    const origin = new URL(src.embed).origin;
-    const onMessage = (event: MessageEvent) => {
-      if (event.origin === origin && playerEnded(event.data)) onEnded();
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [src, onEnded]);
 
   if (!src) {
     return <div className={`${frameClass} flex items-center justify-center bg-surface text-muted-foreground`}>{t("noVideo")}</div>;
@@ -74,7 +65,6 @@ export function VideoPlayer({ url, poster, title, onFirstPlay, onEnded, vertical
         onPause={() => setPlaying(false)}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDur(e.currentTarget.duration)}
-        onEnded={onEnded}
       />
       {!playing && (
         <button onClick={toggle} aria-label="Play" className="absolute inset-0 m-auto flex size-16 items-center justify-center rounded-full bg-gradient-primary shadow-glow">

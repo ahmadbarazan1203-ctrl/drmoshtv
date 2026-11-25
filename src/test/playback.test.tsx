@@ -1,15 +1,16 @@
-import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { VideoPlayer } from "@/components/site/VideoPlayer";
 import { I18nProvider } from "@/lib/i18n";
-import { autoplayEmbed, episodeSwipe, playerEnded } from "@/lib/playback";
+import { autoplayEmbed, episodeNeighbors, firstEpisode, orderEpisodes } from "@/lib/playback";
 
 describe("Episode playback", () => {
-  it("starts direct episode files automatically and muted", () => {
-    const { container } = render(<I18nProvider><VideoPlayer url="https://cdn.example.org/episode.mp4" title="Episode" autoPlay /></I18nProvider>);
+  it("starts direct episode files automatically and muted in a vertical 9:16 frame when vertical is set", () => {
+    const { container } = render(<I18nProvider><VideoPlayer url="https://cdn.example.org/episode.mp4" title="Episode" vertical autoPlay /></I18nProvider>);
     const video = container.querySelector("video");
     expect(video).toHaveAttribute("autoplay");
     expect(video?.muted).toBe(true);
+    expect(container.firstElementChild?.className).toContain("aspect-[9/16]");
   });
 
   it("adds autoplay to external players without dropping existing parameters", () => {
@@ -21,28 +22,16 @@ describe("Episode playback", () => {
     expect(youtube.searchParams.get("mute")).toBe("1");
   });
 
-  it("advances when a direct episode finishes", () => {
-    const onEnded = vi.fn();
-    const { container } = render(<I18nProvider><VideoPlayer url="https://cdn.example.org/episode.mp4" title="Episode" onEnded={onEnded} autoPlay /></I18nProvider>);
-    fireEvent.ended(container.querySelector("video")!);
-    expect(onEnded).toHaveBeenCalledOnce();
-  });
-
-  it("accepts end notifications only from the active external player origin", () => {
-    const onEnded = vi.fn();
-    render(<I18nProvider><VideoPlayer url="https://voe.sx/e/kxvjsnzvwuuj" title="Episode" onEnded={onEnded} autoPlay /></I18nProvider>);
-    fireEvent(window, new MessageEvent("message", { data: { event: "ended" }, origin: "https://other.example" }));
-    expect(onEnded).not.toHaveBeenCalled();
-    fireEvent(window, new MessageEvent("message", { data: { event: "ended" }, origin: "https://voe.sx" }));
-    expect(onEnded).toHaveBeenCalledOnce();
-    expect(playerEnded(JSON.stringify({ event: "onStateChange", info: 0 }))).toBe(true);
-    expect(playerEnded({ event: "timeupdate" })).toBe(false);
-  });
-
-  it("uses swipe up for next and swipe down for previous with a deliberate vertical gesture", () => {
-    expect(episodeSwipe(500, 300)).toBe("next");
-    expect(episodeSwipe(300, 500)).toBe("prev");
-    expect(episodeSwipe(500, 470)).toBeNull();
-    expect(episodeSwipe(500, 300, 100, 350)).toBeNull();
+  it("picks the first published episode in season and episode order for direct series entry", () => {
+    const seasons = [{ id: "s2", season_number: 2 }, { id: "s1", season_number: 1 }];
+    const episodes = [
+      { id: "ep-s2-1", season_id: "s2", episode_number: 1 },
+      { id: "ep-s1-2", season_id: "s1", episode_number: 2 },
+      { id: "ep-s1-1", season_id: "s1", episode_number: 1 },
+    ];
+    expect(firstEpisode(episodes, seasons)?.id).toBe("ep-s1-1");
+    expect(firstEpisode([], seasons)).toBeNull();
+    const ordered = orderEpisodes(episodes, seasons);
+    expect(episodeNeighbors(ordered, "ep-s1-2")).toEqual({ prev: episodes[2], next: episodes[0] });
   });
 });
